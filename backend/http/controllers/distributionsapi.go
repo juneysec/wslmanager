@@ -17,7 +17,7 @@ type uriParameter struct {
 	Distribution string `uri:"distribution" binding:"required"`
 }
 
-func (p *DistributionsAPI) ApiV1DistributionsGet(c *gin.Context) {
+func (p *DistributionsAPI) DistributionsGet(c *gin.Context) {
 	workspace, err := workspaces.NewWSLManagerWorkspace()
 	if err != nil {
 		log.Fatal(err)
@@ -37,7 +37,7 @@ func (p *DistributionsAPI) ApiV1DistributionsGet(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (p *DistributionsAPI) ApiV1DistributionsDistributionGet(c *gin.Context) {
+func (p *DistributionsAPI) DistributionsDistributionGet(c *gin.Context) {
 	var uriParam uriParameter
 	c.ShouldBindUri(&uriParam)
 

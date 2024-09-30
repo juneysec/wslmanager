@@ -3,9 +3,9 @@ info:
   title: WSLManager API
   version: "1.0"
 servers:
-- url: http://localhost:8080
+- url: http://localhost:8080/api/v1
 paths:
-  /api/v1/distributions:
+  /distributions:
     get:
       description: ディストリビューション
       responses:
@@ -27,7 +27,7 @@ paths:
       summary: ディストリビューションのリストを取得する
       tags:
       - distributions
-  /api/v1/distributions/{distribution}:
+  /distributions/{distribution}:
     get:
       description: ディストリビューション
       parameters:

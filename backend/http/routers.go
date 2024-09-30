@@ -16,13 +16,13 @@ import (
 )
 
 type DistributionsAPIController interface { 
-  ApiV1DistributionsDistributionGet(*gin.Context)
-  ApiV1DistributionsGet(*gin.Context)
+  DistributionsDistributionGet(*gin.Context)
+  DistributionsGet(*gin.Context)
 }
 
 func registerDistributionsAPIRoutes(e *gin.Engine, r DistributionsAPIController) {
-  e.GET("/api/v1/distributions/:distribution", r.ApiV1DistributionsDistributionGet)
-  e.GET("/api/v1/distributions", r.ApiV1DistributionsGet)
+  e.GET("/api/v1/distributions/:distribution", r.DistributionsDistributionGet)
+  e.GET("/api/v1/distributions", r.DistributionsGet)
 }
 
 func RegisterRoutes(e *gin.Engine) {
