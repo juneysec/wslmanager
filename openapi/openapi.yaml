@@ -1,0 +1,49 @@
+# VSCode: Shift + Alt + P
+openapi: '3.0.3'
+info:
+  title: WSLManager API
+  version: '1.0'
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/v1/distributions:
+    get:
+      tags:
+        - distributions
+      summary: ディストリビューションのリストを取得する
+      description: ディストリビューション
+      responses:
+        '200':
+          description: ディストリビューションリスト
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  items:
+                    $ref: './responses/distribution.yaml#/components/schemas/response_distribution'
+                  example:
+                    isDefault: true
+                    name: 'Ubuntu'
+                    state: 'Running'
+                    version: '2.0'
+
+  /api/v1/distributions/{distribution}:
+    get:
+      tags:
+        - distributions
+      summary: ディストリビューションを取得する
+      description: ディストリビューション
+      parameters:
+        - name: "distribution"
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: ディストリビューション
+          content:
+            application/json:
+              schema:
+                $ref: './responses/distribution.yaml#/components/schemas/response_distribution'

@@ -1,0 +1,81 @@
+openapi: 3.0.3
+info:
+  title: WSLManager API
+  version: "1.0"
+servers:
+- url: http://localhost:8080
+paths:
+  /api/v1/distributions:
+    get:
+      description: ディストリビューション
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  example:
+                    isDefault: true
+                    name: Ubuntu
+                    state: Running
+                    version: "2.0"
+                  items:
+                    $ref: '#/components/schemas/response_distribution'
+                  type: array
+                type: array
+          description: ディストリビューションリスト
+      summary: ディストリビューションのリストを取得する
+      tags:
+      - distributions
+  /api/v1/distributions/{distribution}:
+    get:
+      description: ディストリビューション
+      parameters:
+      - explode: false
+        in: path
+        name: distribution
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_distribution'
+          description: ディストリビューション
+      summary: ディストリビューションを取得する
+      tags:
+      - distributions
+components:
+  schemas:
+    response_distribution:
+      example:
+        isDefault: true
+        name: Ubuntu
+        state: Running
+        version: "2.0"
+      properties:
+        isDefault:
+          description: デフォルトの場合true
+          example: true
+          type: boolean
+        name:
+          description: ディストリビューション名
+          example: Ubuntu
+          type: string
+        state:
+          description: 状態
+          example: Running
+          type: string
+        version:
+          description: WSLのバージョン
+          example: "2.0"
+          type: string
+      required:
+      - isDefault
+      - name
+      - state
+      - version
+      type: object

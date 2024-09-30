@@ -1,0 +1,19 @@
+{{>partial_header}}
+package http
+
+import (
+  "github.com/gin-gonic/gin"
+  "wslmanager/http/controllers"
+)
+{{#apiInfo}}{{#apis}}
+type {{classname}}Controller interface { {{#operations}}{{#operation}}
+  {{operationId}}(*gin.Context){{/operation}}{{/operations}}
+}
+{{/apis}}{{/apiInfo}}{{#apiInfo}}{{#apis}}
+func register{{classname}}Routes(e *gin.Engine, r {{classname}}Controller) {
+{{#operations}}{{#operation}}  e.{{httpMethod}}("{{{basePathWithoutHost}}}{{{path}}}", r.{{operationId}})
+{{/operation}}{{/operations}}}
+{{/apis}}{{/apiInfo}}
+func RegisterRoutes(e *gin.Engine) {
+  {{#apiInfo}}{{#apis}}register{{classname}}Routes(e, &controllers.{{classname}}{})
+{{/apis}}{{/apiInfo}}}
