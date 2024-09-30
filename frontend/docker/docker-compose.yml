@@ -1,0 +1,9 @@
+services:
+  nodejs:
+    build:
+        context: .
+    tty: true
+    volumes:
+      - ../vue:/home/developer/src
+    ports:
+      - 5173:5173
