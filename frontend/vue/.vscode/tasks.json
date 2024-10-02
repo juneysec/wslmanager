@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "dev",
+      "problemMatcher": [
+        {
+          "pattern": {
+            "regexp": "^$"
+          },
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": ">.*",
+            "endsPattern": ".*enter to show help$"
+          }
+        }
+      ],
+      "label": "npm: dev",
+      "detail": "vite",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "isBackground": true
+    }
+  ]
+}
