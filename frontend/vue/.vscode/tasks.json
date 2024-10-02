@@ -23,6 +23,12 @@
         "isDefault": true
       },
       "isBackground": true
+    },
+    {
+      "type": "shell",
+      "label": "npm ci",
+      "command": "npm ci",
+      "group": "build"
     }
   ]
 }
