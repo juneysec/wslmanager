@@ -10,6 +10,11 @@ const router = createRouter({
       component: HomeView
     },
     {
+      path: '/toolinstaller',
+      name: 'toolinstaller',
+      component: () => import('../views/ToolInstaller.vue')
+    },
+    {
       path: '/about',
       name: 'about',
       component: () => import('../views/AboutView.vue')
