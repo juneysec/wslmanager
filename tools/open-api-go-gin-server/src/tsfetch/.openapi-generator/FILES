@@ -1,0 +1,7 @@
+.openapi-generator-ignore
+apis/DistributionsApi.ts
+apis/index.ts
+index.ts
+models/ResponseDistribution.ts
+models/index.ts
+runtime.ts
