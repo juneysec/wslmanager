@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import client from '../lib'
+import LoadingDialog from '../components/LoadingDialog.vue'
 import type { paths } from '../generated/schema'
 import { ref } from 'vue'
 import type { ParamsOption, RequestBodyOption } from 'openapi-fetch'
@@ -48,41 +49,34 @@ const get = (fetchOptions: distributionsQueryOptions<paths['/distributions']['ge
 }
 
 const { state, isReady, isFetching, error, execute } = get({})
+const test = ref(true)
+const save = () =>
+{
+  console.log('test')
+}
 </script>
 
 <template>
-  <v-main>
-    <v-dialog v-model="isFetching" persistent width="300">
-      <v-card height="300" class="text-center">
-        <v-progress-circular
-          :indeterminate="isFetching"
-          :size="200"
-          color="primary"
-          class="mx-auto my-auto"
-          >Loading...
-        </v-progress-circular>
-      </v-card>
-    </v-dialog>
+  <loading-dialog :isLoading="isFetching" />
 
-    <v-card :loading="isFetching" class="mx-auto">
-      <v-table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>ディストリビューション</th>
-            <th>状態</th>
-            <th>バージョン</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in state" :key="item.distributions">
-            <td>{{ item.isDefault ? '*' : '' }}</td>
-            <td>{{ item.name }}</td>
-            <td>{{ item.state }}</td>
-            <td>{{ item.version }}</td>
-          </tr>
-        </tbody>
-      </v-table>
-    </v-card>
-  </v-main>
+  <v-sheet :loading="isFetching" variant="tonal" class="mx-auto w-auto">
+    <v-table>
+      <thead>
+        <tr>
+          <th></th>
+          <th nowrap>ディストリビューション</th>
+          <th nowrap>状態</th>
+          <th nowrap>バージョン</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in state" :key="item.distributions">
+          <td>{{ item.isDefault ? '*' : '' }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.state }}</td>
+          <td>{{ item.version }}</td>
+        </tr>
+      </tbody>
+    </v-table>
+  </v-sheet>
 </template>
