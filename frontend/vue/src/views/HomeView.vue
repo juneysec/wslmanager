@@ -1,54 +1,10 @@
 <script setup lang="ts">
-import client from '../lib'
-import LoadingDialog from '../components/LoadingDialog.vue'
-import type { paths } from '../generated/schema'
 import { ref } from 'vue'
-import type { ParamsOption, RequestBodyOption } from 'openapi-fetch'
+import LoadingDialog from '../components/LoadingDialog.vue'
+import { Distributions } from '../composables/Distributions'
 
-interface AppError {
-  code: number
-  message: string
-}
+const { data, isFetching, execute: refresh } = Distributions.get()
 
-type distributionsQueryOptions<T> = ParamsOption<T> & RequestBodyOption<T>
-type DistributionsResponse =
-  paths['/distributions']['get']['responses']['200']['content']['application/json']
-
-const get = (fetchOptions: distributionsQueryOptions<paths['/distributions']['get']>) => {
-  const state = ref<DistributionsResponse>()
-  const isReady = ref(false)
-  const isFetching = ref(false)
-  const error = ref<AppError | undefined>(undefined)
-
-  async function execute() {
-    error.value = undefined
-    isReady.value = false
-    isFetching.value = true
-
-    const { data, error: fetchError } = await client.GET('/distributions', fetchOptions)
-
-    if (fetchError) {
-      error.value = fetchError
-    } else {
-      state.value = data
-      isReady.value = true
-    }
-
-    isFetching.value = false
-  }
-
-  execute()
-
-  return {
-    state,
-    isReady,
-    isFetching,
-    error,
-    execute
-  }
-}
-
-const { state, isReady, isFetching, error, execute } = get({})
 </script>
 
 <template>
@@ -62,16 +18,32 @@ const { state, isReady, isFetching, error, execute } = get({})
           <th nowrap width="100%">ディストリビューション</th>
           <th nowrap>バージョン</th>
           <th nowrap width="0" class="text-center">状態</th>
-          <th width="0" colspan="5">コマンド</th>
-          <th width="0" class="text-right">
-            <v-btn icon="mdi-import" class="mx-4 smbtn" variant="text" />
-            <v-btn icon="mdi-power" class="smbtn" variant="text" />
+          <th width="0" colspan="3">コマンド</th>
+          <th width="0" colspan="3" class="text-right">
+
+            <v-tooltip text="インポート...">
+              <template v-slot:activator="{ props }">
+                <v-btn icon="mdi-import" class="smbtn" variant="text" v-bind="props" />
+              </template>
+            </v-tooltip>
+
+            <v-tooltip text="シャットダウン">
+              <template v-slot:activator="{ props }">
+                <v-btn icon="mdi-power" class="smbtn" variant="text" v-bind="props" />
+              </template>
+            </v-tooltip>
+
+            <v-tooltip text="再読込">
+              <template v-slot:activator="{ props }">
+                <v-btn icon="mdi-refresh" class="smbtn ml-4" variant="text" @click="refresh()" v-bind="props" />
+              </template>
+            </v-tooltip>
           </th>
         </tr>
       </thead>
 
       <tbody>
-        <tr v-for="item in state" :key="item.distributions">
+        <tr v-for="item in data" :key="item.distributions">
           <td>
             <v-container v-if="item.isDefault" class="text-right">*</v-container>
           </td>
@@ -83,49 +55,82 @@ const { state, isReady, isFetching, error, execute } = get({})
             }}</v-container>
           </td>
           <td>
-            <v-btn
-              icon="mdi-play"
-              class="play smbtn"
-              :disabled="item.state == 'Running'"
-              variant="text"
-            >
-            </v-btn>
+            <v-tooltip :text="item.name + 'を起動する'">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  icon="mdi-play"
+                  class="play smbtn"
+                  :disabled="item.state == 'Running'"
+                  v-bind="props"
+                  variant="text" />
+              </template>
+            </v-tooltip>
           </td>
           <td>
-            <v-btn
-              icon="mdi-stop"
-              class="stop smbtn"
-              :disabled="item.state == 'Stopped'"
-              variant="text"
-            >
-            </v-btn>
+            <v-tooltip :text="item.name + 'を停止する'">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  icon="mdi-stop"
+                  class="stop smbtn"
+                  :disabled="item.state == 'Stopped'"
+                  v-bind="props"
+                  variant="text"
+                />
+              </template>
+            </v-tooltip>
           </td>
           <td>
             <!-- bash 起動 -->
-            <v-btn
-              icon="mdi-bash"
-              :disabled="item.state == 'Stopped'"
-              variant="text"
-              class="smbtn"
-            />
+            <v-tooltip :text="item.name + 'の bash を起動する'">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  icon="mdi-bash"
+                  :disabled="item.state == 'Stopped'"
+                  variant="text"
+                  class="smbtn"
+                  v-bind="props"
+                />
+              </template>
+            </v-tooltip>
           </td>
+
+          <!-- デフォルトに設定 -->
+          <td>
+            <v-tooltip :text="item.name + 'をデフォルトに設定する'">
+              <template v-slot:activator="{ props }">
+                <v-container v-if="!item.isDefault" class="text-left"
+                  ><v-btn 
+                  icon="mdi-asterisk"
+                  class="smbtn"
+                  variant="text"
+                  v-bind="props"
+                  ></v-btn>
+                </v-container>
+              </template>
+            </v-tooltip>
+          </td>
+
           <td>
             <!-- エクスポート -->
-            <v-btn icon="mdi-export" variant="text" class="smbtn" />
+            <v-tooltip :text="item.name + 'をエクスポートする...'">
+              <template v-slot:activator="{ props }">
+                <v-btn icon="mdi-export" variant="text" class="smbtn" v-bind="props"/>
+              </template>
+            </v-tooltip>
           </td>
           <td>
             <!-- 削除 -->
-            <v-btn
-              icon="mdi-delete"
-              class="del smbtn"
-              :disabled="item.state == 'Running'"
-              variant="text"
-            />
-          </td>
-          <td>
-            <v-container v-if="!item.isDefault" class="text-left"
-              ><v-btn color="primary">デフォルトに設定</v-btn>
-            </v-container>
+            <v-tooltip :text="item.name + 'を削除する...'">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  icon="mdi-delete"
+                  class="del smbtn"
+                  :disabled="item.state == 'Running'"
+                  variant="text"
+                  v-bind="props"
+                />
+              </template>
+            </v-tooltip>
           </td>
         </tr>
       </tbody>

@@ -1,0 +1,11 @@
+components:
+  schemas:
+    request_distribution_delete:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: ディストリビューション名
+          example: Ubuntu

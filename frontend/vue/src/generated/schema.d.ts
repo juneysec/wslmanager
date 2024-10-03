@@ -33,6 +33,24 @@ export interface paths {
                         "application/json": Record<string, never>[];
                     };
                 };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
             };
         };
         put?: never;
@@ -52,7 +70,7 @@ export interface paths {
         };
         /**
          * ディストリビューションを取得する
-         * @description ディストリビューション
+         * @description ディストリビューションを取得する
          */
         get: {
             parameters: {
@@ -74,11 +92,197 @@ export interface paths {
                         "application/json": components["schemas"]["response_distribution"];
                     };
                 };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
             };
         };
-        put?: never;
-        post?: never;
-        delete?: never;
+        /**
+         * ディストリビューションのコマンド実行
+         * @description ディストリビューションのコマンド実行
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    distribution: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["request_distribution_put"];
+                };
+            };
+            responses: {
+                /** @description ディストリビューションリスト */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>[];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+            };
+        };
+        /**
+         * ディストリビューションをインポートして新規作成する
+         * @description ディストリビューションをインポートして新規作成する
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    distribution: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["request_distribution_post"];
+                };
+            };
+            responses: {
+                /** @description ディストリビューションリスト */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>[];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+            };
+        };
+        /**
+         * ディストリビューションの削除
+         * @description ディストリビューションの削除
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    distribution: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["request_distribution_delete"];
+                };
+            };
+            responses: {
+                /** @description ディストリビューションリスト */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>[];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -109,6 +313,50 @@ export interface components {
              * @example 2
              */
             version: string;
+        };
+        response_error: {
+            /**
+             * @description エラーコード
+             * @example 101
+             */
+            code?: string;
+            /**
+             * @description エラーメッセージ
+             * @example ディストリビューションが見つかりませんでした。
+             */
+            message?: string;
+        };
+        request_distribution_put: {
+            /**
+             * @description コマンド
+             * @example run
+             * @enum {string}
+             */
+            command: "start" | "stop" | "shell" | "export" | "set-default";
+            /**
+             * @description コマンドが export の場合に、エクスポート先
+             * @example c:\wsl\exp1
+             */
+            path?: string;
+        };
+        request_distribution_post: {
+            /**
+             * @description ディストリビューションの名前
+             * @example Ubuntu 2
+             */
+            name: string;
+            /**
+             * @description インポート元のパス
+             * @example c:\wsl\exp1
+             */
+            path: string;
+        };
+        request_distribution_delete: {
+            /**
+             * @description ディストリビューション名
+             * @example Ubuntu
+             */
+            name: string;
         };
     };
     responses: never;

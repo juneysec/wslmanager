@@ -28,13 +28,25 @@ paths:
                     name: 'Ubuntu'
                     state: 'Running'
                     version: '2.0'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
 
   /distributions/{distribution}:
     get:
       tags:
         - distributions
       summary: ディストリビューションを取得する
-      description: ディストリビューション
+      description: ディストリビューションを取得する
       parameters:
         - name: 'distribution'
           in: path
@@ -47,3 +59,162 @@ paths:
             application/json:
               schema:
                 $ref: './responses/distribution.yaml#/components/schemas/response_distribution'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+    post:
+      tags:
+        - distributions
+      summary: ディストリビューションをインポートして新規作成する
+      description: ディストリビューションをインポートして新規作成する
+      parameters:
+        - name: 'distribution'
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './requests/distribution_post.yaml#/components/schemas/request_distribution_post'
+      responses:
+        '200':
+          description: ディストリビューションリスト
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  items:
+                    $ref: './responses/distribution.yaml#/components/schemas/response_distribution'
+                  example:
+                    isDefault: true
+                    name: 'Ubuntu'
+                    state: 'Running'
+                    version: '2.0'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+    put:
+      tags:
+        - distributions
+      summary: ディストリビューションのコマンド実行
+      description: ディストリビューションのコマンド実行
+      parameters:
+        - name: 'distribution'
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './requests/distribution_put.yaml#/components/schemas/request_distribution_put'
+      responses:
+        '200':
+          description: ディストリビューションリスト
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  items:
+                    $ref: './responses/distribution.yaml#/components/schemas/response_distribution'
+                  example:
+                    isDefault: true
+                    name: 'Ubuntu'
+                    state: 'Running'
+                    version: '2.0'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+    delete:
+      tags:
+        - distributions
+      summary: ディストリビューションの削除
+      description: ディストリビューションの削除
+      parameters:
+        - name: 'distribution'
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './requests/distribution_delete.yaml#/components/schemas/request_distribution_delete'
+      responses:
+        '200':
+          description: ディストリビューションリスト
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  items:
+                    $ref: './responses/distribution.yaml#/components/schemas/response_distribution'
+                  example:
+                    isDefault: true
+                    name: 'Ubuntu'
+                    state: 'Running'
+                    version: '2.0'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'               

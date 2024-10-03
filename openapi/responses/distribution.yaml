@@ -1,5 +1,4 @@
 # VSCode: Shift + Alt + P
-openapi: '3.0.3'
 info:
   title: WSLManager API
   version: '1.0'

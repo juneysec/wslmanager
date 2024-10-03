@@ -1,0 +1,18 @@
+info:
+  title: WSLManager API
+  version: '1.0'
+  description: 'エラーレスポンス'
+components:
+  schemas:
+    response_error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: エラーコード
+          example: 101
+        message:
+          type: string
+          description: エラーメッセージ
+          example: ディストリビューションが見つかりませんでした。
+

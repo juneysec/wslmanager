@@ -1,0 +1,22 @@
+components:
+  schemas:
+    request_distribution_put:
+      type: object
+      required:
+        - command
+      properties:
+        command:
+          type: string
+          description: コマンド
+          example: run
+          enum:
+          - start  # 起動
+          - stop   # 停止
+          - shell  # シェル起動
+          - export # エクスポート
+          - set-default # デフォルトに変更する
+        path:
+          type: string
+          description: コマンドが export の場合に、エクスポート先
+          example: c:\wsl\exp1
+
