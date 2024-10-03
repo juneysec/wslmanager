@@ -16,12 +16,18 @@ import (
 )
 
 type DistributionsAPIController interface { 
+  DistributionsDistributionDelete(*gin.Context)
   DistributionsDistributionGet(*gin.Context)
+  DistributionsDistributionPost(*gin.Context)
+  DistributionsDistributionPut(*gin.Context)
   DistributionsGet(*gin.Context)
 }
 
 func registerDistributionsAPIRoutes(e *gin.Engine, r DistributionsAPIController) {
+  e.DELETE("/api/v1/distributions/:distribution", r.DistributionsDistributionDelete)
   e.GET("/api/v1/distributions/:distribution", r.DistributionsDistributionGet)
+  e.POST("/api/v1/distributions/:distribution", r.DistributionsDistributionPost)
+  e.PUT("/api/v1/distributions/:distribution", r.DistributionsDistributionPut)
   e.GET("/api/v1/distributions", r.DistributionsGet)
 }
 

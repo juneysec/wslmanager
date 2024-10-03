@@ -62,3 +62,24 @@ func (p *DistributionsAPI) DistributionsDistributionGet(c *gin.Context) {
 
 	c.JSON(http.StatusNotFound, schema.ResponseDistribution{})
 }
+
+func (p *DistributionsAPI) DistributionsDistributionPost(c *gin.Context) {
+	c.JSON(http.StatusNotFound, schema.ResponseError{
+		Code:    "1001",
+		Message: "サポートされていません。",
+	})
+}
+
+func (p *DistributionsAPI) DistributionsDistributionPut(c *gin.Context) {
+	c.JSON(http.StatusNotFound, schema.ResponseError{
+		Code:    "1001",
+		Message: "サポートされていません。",
+	})
+}
+
+func (p *DistributionsAPI) DistributionsDistributionDelete(c *gin.Context) {
+	c.JSON(http.StatusNotFound, schema.ResponseError{
+		Code:    "1001",
+		Message: "サポートされていません。",
+	})
+}
