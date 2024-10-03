@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import LoadingDialog from '../components/LoadingDialog.vue'
+import * as Apis from '../apis'
 import { Distributions } from '../composables/Distributions'
 
-const { data, isFetching, execute: refresh } = Distributions.get()
-
+const isFetching = ref(false)
+const data = ref<Apis.ResponseDistributions>()
+const distributions = new Distributions({ isFetching, data })
+const { execute: refresh } = distributions.get()
 </script>
 
 <template>
@@ -20,7 +23,6 @@ const { data, isFetching, execute: refresh } = Distributions.get()
           <th nowrap width="0" class="text-center">状態</th>
           <th width="0" colspan="3">コマンド</th>
           <th width="0" colspan="3" class="text-right">
-
             <v-tooltip text="インポート...">
               <template v-slot:activator="{ props }">
                 <v-btn icon="mdi-import" class="smbtn" variant="text" v-bind="props" />
@@ -35,7 +37,13 @@ const { data, isFetching, execute: refresh } = Distributions.get()
 
             <v-tooltip text="再読込">
               <template v-slot:activator="{ props }">
-                <v-btn icon="mdi-refresh" class="smbtn ml-4" variant="text" @click="refresh()" v-bind="props" />
+                <v-btn
+                  icon="mdi-refresh"
+                  class="smbtn ml-4"
+                  variant="text"
+                  @click="refresh()"
+                  v-bind="props"
+                />
               </template>
             </v-tooltip>
           </th>
@@ -62,7 +70,9 @@ const { data, isFetching, execute: refresh } = Distributions.get()
                   class="play smbtn"
                   :disabled="item.state == 'Running'"
                   v-bind="props"
-                  variant="text" />
+                  variant="text"
+                  @click="distributions.put(item.name!, 'start')"
+                />
               </template>
             </v-tooltip>
           </td>
@@ -75,6 +85,7 @@ const { data, isFetching, execute: refresh } = Distributions.get()
                   :disabled="item.state == 'Stopped'"
                   v-bind="props"
                   variant="text"
+                  @click="distributions.put(item.name!, 'stop')"
                 />
               </template>
             </v-tooltip>
@@ -89,6 +100,7 @@ const { data, isFetching, execute: refresh } = Distributions.get()
                   variant="text"
                   class="smbtn"
                   v-bind="props"
+                  @click="distributions.put(item.name!, 'shell')"
                 />
               </template>
             </v-tooltip>
@@ -99,11 +111,12 @@ const { data, isFetching, execute: refresh } = Distributions.get()
             <v-tooltip :text="item.name + 'をデフォルトに設定する'">
               <template v-slot:activator="{ props }">
                 <v-container v-if="!item.isDefault" class="text-left"
-                  ><v-btn 
-                  icon="mdi-asterisk"
-                  class="smbtn"
-                  variant="text"
-                  v-bind="props"
+                  ><v-btn
+                    icon="mdi-asterisk"
+                    class="smbtn"
+                    variant="text"
+                    v-bind="props"
+                    @click="distributions.put(item.name!, 'set-default')"
                   ></v-btn>
                 </v-container>
               </template>
@@ -114,7 +127,7 @@ const { data, isFetching, execute: refresh } = Distributions.get()
             <!-- エクスポート -->
             <v-tooltip :text="item.name + 'をエクスポートする...'">
               <template v-slot:activator="{ props }">
-                <v-btn icon="mdi-export" variant="text" class="smbtn" v-bind="props"/>
+                <v-btn icon="mdi-export" variant="text" class="smbtn" v-bind="props" />
               </template>
             </v-tooltip>
           </td>

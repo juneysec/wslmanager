@@ -4,10 +4,13 @@ package workspaces
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os/exec"
+	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"wslmanager/domains/domainobjects"
@@ -23,20 +26,28 @@ type WSLManagerWorkspace struct {
 
 // WSL管理ツールのワークスペース生成
 func NewWSLManagerWorkspace() (*WSLManagerWorkspace, error) {
-	return &WSLManagerWorkspace{}, nil
+	ret := &WSLManagerWorkspace{}
+	err := ret.Fetch()
+
+	if err != nil {
+		return nil, err
+	} else {
+		return ret, err
+	}
 }
 
 // ディストリビューションリストの読み込み。
 //
 // p.Distributions にディストリビューションリストが格納される
 func (p *WSLManagerWorkspace) Fetch() error {
+	p.Distributions = p.Distributions[:0]
 	re, err := regexp.Compile(`(\*?)[\s]+([^\s]+)[\s]+([^\s]+)[\s]+([^\s]+)`)
 	if err != nil {
 		log.Println("failed to compile regexp:", err)
 		return err
 	}
 
-	output, err := winexec("wsl.exe", "-l", "-v")
+	_, output, err := winexec("wsl.exe", "-l", "-v")
 	if err != nil {
 		log.Println("failed to call winexec:", err)
 		return err
@@ -62,15 +73,95 @@ func (p *WSLManagerWorkspace) Fetch() error {
 	return nil
 }
 
+func (p *WSLManagerWorkspace) Find(name string) (*domainobjects.Distribution, error) {
+	idx := slices.IndexFunc(p.Distributions, func (d *domainobjects.Distribution) bool { return d.Name == name}) 
+	if idx < 0 {
+		return nil, fmt.Errorf("ディストリビューション[%s] は存在しません。", name)
+	}
+
+	return p.Distributions[idx], nil
+}
+
+func (p *WSLManagerWorkspace) Start(name string) error {
+	exitCode, output, err := winexec("wsl.exe", "-d", name, "-e", "echo", "hello")
+	if err != nil {
+		return err
+	}
+
+	if exitCode != 0 {
+		return fmt.Errorf("wsl.exe returns %v.\noutput is:\n%s", exitCode, output)
+	}
+
+	return nil
+}
+
+func (p *WSLManagerWorkspace) Stop(name string) error {
+	exitCode, output, err := winexec("wsl.exe", "-t", name)
+	if err != nil {
+		return err
+	}
+
+	if exitCode != 0 {
+		return fmt.Errorf("wsl.exe returns %v.\noutput is:\n%s", exitCode, output)
+	}
+
+	return nil
+}
+
+func (p *WSLManagerWorkspace) ExecShell(name string) error {
+	exitCode, output, err := wincmd("cmd", "/C", "start", "wsl.exe", "-d", name)
+	if err != nil {
+		return err
+	}
+
+	if exitCode != 0 {
+		return fmt.Errorf("wsl.exe returns %v.\noutput is:\n%s", exitCode, output)
+	}
+
+	return nil
+}
+
+func (p *WSLManagerWorkspace) Export(name string, path string) error {
+	// 拡張子を取得。.tar ではない場合、.tar を付与する
+	extension := strings.ToLower(filepath.Ext(path))
+	if extension != ".tar" {
+		path = path + ".tar"
+	}
+
+	exitCode, output, err := winexec("wsl.exe", "--export", name, path)
+	if err != nil {
+		return err
+	}
+
+	if exitCode != 0 {
+		return fmt.Errorf("wsl.exe returns %v.\noutput is:\n%s", exitCode, output)
+	}
+
+	return nil
+}
+
+func (p *WSLManagerWorkspace) SetDefault(name string) error {
+	exitCode, output, err := winexec("wsl.exe", "--set-default", name)
+	if err != nil {
+		return err
+	}
+
+	if exitCode != 0 {
+		return fmt.Errorf("wsl.exe returns %v.\noutput is:\n%s", exitCode, output)
+	}
+
+	return nil
+}
+
 // コマンド実行
 // Windows の場合、StdOut が UTF-16 になるのでUTF-8に変換して返す。
-func winexec(name string, arg ...string) (string, error) {
+func winexec(name string, arg ...string) (int, string, error) {
 	cmd := exec.Command(name, arg...)
 
 	output, err := cmd.Output()
 	if err != nil {
 		log.Printf("failed to call exec.Command(%v).Output: %v", name, err)
-		return "", err
+		return -1, "", err
 	}
 
 	utf16Reader := transform.NewReader(bytes.NewReader(output), unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewDecoder())
@@ -78,8 +169,20 @@ func winexec(name string, arg ...string) (string, error) {
 	_, err = io.Copy(&buf, utf16Reader)
 	if err != nil {
 		log.Printf("failed to call io.Copy(): %v", err)
-		return "", err
+		return -1, "", err
 	}
 
-	return buf.String(), nil
+	return cmd.ProcessState.ExitCode(), buf.String(), nil
+}
+
+// コマンド実行
+// Windows の場合、StdOut が UTF-16 になるのでUTF-8に変換して返す。
+func wincmd(name string, arg ...string) (int, string, error) {
+	cmd := exec.Command(name, arg...)
+	err := cmd.Start()
+	if err != nil {
+		return -1, "実行に失敗しました。", err
+	}
+
+	return 0, "", nil
 }
