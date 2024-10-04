@@ -3,15 +3,27 @@ import { ref } from 'vue'
 import LoadingDialog from '../components/LoadingDialog.vue'
 import * as Apis from '../apis'
 import { Distributions } from '../composables/Distributions'
+import NotificationBar from '../components/NotificationBar.vue'
+import { type Notification } from '../components/NotificationBar.vue'
 
 const isFetching = ref(false)
 const data = ref<Apis.ResponseDistributions>()
 const distributions = new Distributions({ isFetching, data })
 const { execute: refresh } = distributions.get()
+
+const notification = ref()
+const notifications = ref<Notification[]>([])
+const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: number) => {
+  notification.value.notify(type, message, timeout)
+}
 </script>
 
 <template>
+  <notification-bar v-model="notifications" ref="notification" />
   <loading-dialog :isLoading="isFetching" />
+
+  <!-- 通知テスト TODO:削除 -->
+  <v-btn @click="notify('warn', '<pre>test\nahoge</pre>', 3000)" />
 
   <v-sheet :loading="isFetching" variant="tonal" class="mx-auto w-auto">
     <v-table>
@@ -96,7 +108,6 @@ const { execute: refresh } = distributions.get()
               <template v-slot:activator="{ props }">
                 <v-btn
                   icon="mdi-bash"
-                  :disabled="item.state == 'Stopped'"
                   variant="text"
                   class="smbtn"
                   v-bind="props"
@@ -151,7 +162,7 @@ const { execute: refresh } = distributions.get()
   </v-sheet>
 </template>
 
-<style>
+<style scoped>
 .play {
   color: lightgreen;
 }
@@ -167,5 +178,43 @@ const { execute: refresh } = distributions.get()
 .smbtn {
   width: 2em !important;
   height: 2em !important;
+}
+
+.notifier {
+  position: fixed;
+  z-index: 10000;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 0px;
+  background-color: #0079be;
+  color: #ffffff;
+}
+
+.notifier-contents {
+  max-height: 5em;
+  overflow-y: auto; /* 垂直スクロールを有効化 */
+}
+
+.notifier-message {
+  flex-grow: 1; /* 残りのスペースを占有 */
+  margin-right: 10px; /* ボタンとの間に余白をつける */
+}
+
+.notifier-close-button {
+  flex-shrink: 0; /* ボタンのサイズを固定 */
+}
+
+.notifier-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.notifier-leave-active {
+  transition: all 0.8s ease;
+}
+
+.notifier-enter-from,
+.notifier-leave-to {
+  transform: translateY(100px);
 }
 </style>
