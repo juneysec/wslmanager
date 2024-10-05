@@ -1,16 +1,57 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import LoadingDialog from '../components/LoadingDialog.vue'
 import * as Apis from '../apis'
-import { Distributions } from '../composables/Distributions'
-import NotificationBar from '../components/NotificationBar.vue'
-import { type Notification } from '../components/NotificationBar.vue'
+import { useDistributionsGet } from '../composables/distributions-get'
+import { useDistributionPut } from '../composables/distribution-put'
+import NotificationBar, { type Notification } from '../components/NotificationBar.vue'
 
-const isFetching = ref(false)
-const data = ref<Apis.ResponseDistributions>()
-const distributions = new Distributions({ isFetching, data })
-const { execute: refresh } = distributions.get()
+const distributions = ref<Apis.ResponseDistributions>([])
 
+// distributionsGet 関連
+const {
+  distributions: distributionsGetData,
+  isFetching: isDistributionsGetFetching,
+  error: distributionsGetError,
+  distributionsGet
+} = useDistributionsGet()
+watch(distributionsGetData, () => {
+  distributions.value = distributionsGetData.value
+})
+watch(distributionsGetError, () => {
+  if (distributionsGetError.value) {
+    notify(
+      'error',
+      `ディストリビューションリストの取得に失敗しました。\n${distributionsGetError.value?.message}`,
+      0
+    )
+  }
+})
+watch(isDistributionsGetFetching, () => {
+  if (!isDistributionsGetFetching.value) {
+    notify('info', 'ディストリビューションリストを読み込みました。', 3000)
+  }
+})
+
+distributionsGet()
+
+// distributionPut 関連
+const {
+  distributions: distributionPutData,
+  isFetching: isDistributionPutFetching,
+  error: distributionPutError,
+  distributionPut
+} = useDistributionPut()
+watch(distributionPutData, () => {
+  distributions.value = distributionPutData.value
+})
+watch(distributionPutError, () => {
+  if (distributionPutError.value) {
+    notify('error', distributionPutError.value?.message ?? '', 0)
+  }
+})
+
+// 通知バー関連
 const notification = ref()
 const notifications = ref<Notification[]>([])
 const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: number) => {
@@ -20,12 +61,13 @@ const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: numbe
 
 <template>
   <notification-bar v-model="notifications" ref="notification" />
-  <loading-dialog :isLoading="isFetching" />
+  <loading-dialog :isLoading="isDistributionPutFetching || isDistributionsGetFetching" />
 
-  <!-- 通知テスト TODO:削除 -->
-  <v-btn @click="notify('warn', '<pre>test\nahoge</pre>', 3000)" />
-
-  <v-sheet :loading="isFetching" variant="tonal" class="mx-auto w-auto">
+  <v-sheet
+    :loading="isDistributionPutFetching || isDistributionsGetFetching"
+    variant="tonal"
+    class="mx-auto w-auto"
+  >
     <v-table>
       <thead style="background-color: darkslategrey">
         <tr>
@@ -53,7 +95,7 @@ const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: numbe
                   icon="mdi-refresh"
                   class="smbtn ml-4"
                   variant="text"
-                  @click="refresh()"
+                  @click="distributionsGet()"
                   v-bind="props"
                 />
               </template>
@@ -63,7 +105,7 @@ const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: numbe
       </thead>
 
       <tbody>
-        <tr v-for="item in data" :key="item.distributions">
+        <tr v-for="item in distributions" :key="item.name">
           <td>
             <v-container v-if="item.isDefault" class="text-right">*</v-container>
           </td>
@@ -83,7 +125,7 @@ const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: numbe
                   :disabled="item.state == 'Running'"
                   v-bind="props"
                   variant="text"
-                  @click="distributions.put(item.name!, 'start')"
+                  @click="distributionPut(item.name!, 'start')"
                 />
               </template>
             </v-tooltip>
@@ -97,7 +139,7 @@ const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: numbe
                   :disabled="item.state == 'Stopped'"
                   v-bind="props"
                   variant="text"
-                  @click="distributions.put(item.name!, 'stop')"
+                  @click="distributionPut(item.name!, 'stop')"
                 />
               </template>
             </v-tooltip>
@@ -111,7 +153,7 @@ const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: numbe
                   variant="text"
                   class="smbtn"
                   v-bind="props"
-                  @click="distributions.put(item.name!, 'shell')"
+                  @click="distributionPut(item.name!, 'shell')"
                 />
               </template>
             </v-tooltip>
@@ -127,7 +169,7 @@ const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: numbe
                     class="smbtn"
                     variant="text"
                     v-bind="props"
-                    @click="distributions.put(item.name!, 'set-default')"
+                    @click="distributionPut(item.name!, 'set-default')"
                   ></v-btn>
                 </v-container>
               </template>
