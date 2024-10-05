@@ -13,8 +13,6 @@ export interface Notification {
   closeTimeout: number
 }
 
-let prevLength = 0
-
 // v-model 定義
 const model = defineModel<Notification[]>({ required: true })
 
@@ -35,9 +33,9 @@ defineExpose({
 // タイムアウトを実装するための watch
 watch(
   () => model.value?.length,
-  () => {
+  (_, oldLength) => {
     // 追加があったときだけ処理
-    if (model.value && model.value.length > prevLength) {
+    if (model.value && model.value.length > oldLength) {
       const notification = model.value[model.value?.length - 1]
 
       // 自動クローズが指定されている場合に通知を閉じる
@@ -48,8 +46,6 @@ watch(
         )
       }
     }
-
-    prevLength = model.value.length
   }
 )
 </script>
