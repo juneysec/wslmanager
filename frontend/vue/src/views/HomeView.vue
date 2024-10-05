@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import LoadingDialog from '../components/LoadingDialog.vue'
 import * as Apis from '../apis'
 import { useDistributionsGet } from '../composables/distributions-get'
 import { useDistributionPut } from '../composables/distribution-put'
+import { useDistributionDelete } from '@/composables/distribution-delete'
+import LoadingDialog from '../components/LoadingDialog.vue'
 import NotificationBar, { type Notification } from '../components/NotificationBar.vue'
+import ConfirmDialog from '../components/ConfirmDialog.vue'
+import InputDialog from '../components/InputDialog.vue'
+import ImportDialog from './ImportDialog.vue'
 
 const distributions = ref<Apis.ResponseDistributions>([])
 
@@ -51,20 +55,96 @@ watch(distributionPutError, () => {
   }
 })
 
+const {
+  distributions: distributionDeleteData,
+  isFetching: isDistributionDeleteFetching,
+  error: distributionDeleteError,
+  distributionDelete
+} = useDistributionDelete()
+watch(distributionDeleteData, () => {
+  distributions.value = distributionDeleteData.value
+})
+watch(distributionDeleteError, () => {
+  if (distributionDeleteError.value) {
+    notify('error', distributionDeleteError.value?.message ?? '', 0)
+  }
+})
+
 // 通知バー関連
 const notification = ref()
 const notifications = ref<Notification[]>([])
 const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: number) => {
   notification.value.notify(type, message, timeout)
 }
+
+// 確認ダイアログ関連
+const confirmDialog = ref()
+const stop = async (distribution: string) => {
+  if (await confirmDialog.value.open(`${distribution}を停止します。\nよろしいですか？`)) {
+    distributionPut(distribution, 'stop')
+  }
+}
+
+// 入力ダイアログ関連
+const pathInputDialog = ref()
+const pathValue = ref('')
+const deleteInputDialog = ref()
+const deleteValue = ref('')
+
+// ディストリビューションのエクスポート
+const exportDistribution = async (distribution: string) => {
+  if (
+    await pathInputDialog.value.open(
+      `${distribution}のエクスポート先を入力してください。`,
+      `${distribution}のエクスポート先`
+    )
+  ) {
+    if (pathValue.value) {
+      distributionPut(distribution, 'export', pathValue.value)
+    }
+  }
+}
+
+const targetName = ref('')
+const deleteDistribution = async (distribution: string) => {
+  deleteValue.value = ''
+  targetName.value = distribution
+
+  if (
+    await deleteInputDialog.value.open(
+      `${distribution}を削除します。\nこの操作が間違いでない場合、下の入力ボックスに ${distribution} と入力してOKを押してください。`,
+      `${distribution}`
+    )
+  ) {
+    if (deleteValue.value === distribution) {
+      distributionDelete(deleteValue.value)
+    }
+  }
+}
+
+const deleteValidator = (val: string) => {
+  return val == targetName.value
+}
+
+const showImportDialog = ref(false)
 </script>
 
 <template>
   <notification-bar v-model="notifications" ref="notification" />
-  <loading-dialog :isLoading="isDistributionPutFetching || isDistributionsGetFetching" />
+  <loading-dialog
+    :isLoading="
+      isDistributionPutFetching || isDistributionsGetFetching || isDistributionDeleteFetching
+    "
+  />
+  <confirm-dialog ref="confirmDialog" />
+  <input-dialog ref="pathInputDialog" v-model="pathValue" />
+  <input-dialog ref="deleteInputDialog" v-model="deleteValue" :validator="deleteValidator" />
+  <import-dialog v-model="showImportDialog" />
 
   <v-sheet
-    :loading="isDistributionPutFetching || isDistributionsGetFetching"
+    :loading="
+      isDistributionPutFetching || isDistributionsGetFetching || isDistributionDeleteFetching
+    "
     variant="tonal"
     class="mx-auto w-auto"
   >
@@ -79,13 +159,13 @@ const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: numbe
           <th width="0" colspan="3" class="text-right">
             <v-tooltip text="インポート...">
               <template v-slot:activator="{ props }">
-                <v-btn icon="mdi-import" class="smbtn" variant="text" v-bind="props" />
-              </template>
-            </v-tooltip>
-
-            <v-tooltip text="シャットダウン">
-              <template v-slot:activator="{ props }">
-                <v-btn icon="mdi-power" class="smbtn" variant="text" v-bind="props" />
+                <v-btn
+                  icon="mdi-import"
+                  class="smbtn"
+                  variant="text"
+                  v-bind="props"
+                  @click="showImportDialog = true"
+                />
               </template>
             </v-tooltip>
 
@@ -139,7 +219,7 @@ const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: numbe
                   :disabled="item.state == 'Stopped'"
                   v-bind="props"
                   variant="text"
-                  @click="distributionPut(item.name!, 'stop')"
+                  @click="stop(item.name!)"
                 />
               </template>
             </v-tooltip>
@@ -180,7 +260,13 @@ const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: numbe
             <!-- エクスポート -->
             <v-tooltip :text="item.name + 'をエクスポートする...'">
               <template v-slot:activator="{ props }">
-                <v-btn icon="mdi-export" variant="text" class="smbtn" v-bind="props" />
+                <v-btn
+                  icon="mdi-export"
+                  variant="text"
+                  class="smbtn"
+                  v-bind="props"
+                  @click="exportDistribution(item.name!)"
+                />
               </template>
             </v-tooltip>
           </td>
@@ -194,6 +280,7 @@ const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: numbe
                   :disabled="item.state == 'Running'"
                   variant="text"
                   v-bind="props"
+                  @click="deleteDistribution(item.name!)"
                 />
               </template>
             </v-tooltip>

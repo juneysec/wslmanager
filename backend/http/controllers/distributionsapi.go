@@ -127,10 +127,51 @@ func (p *DistributionsAPI) DistributionsDistributionPut(c *gin.Context) {
 }
 
 func (p *DistributionsAPI) DistributionsDistributionDelete(c *gin.Context) {
-	c.JSON(http.StatusNotFound, schema.ResponseError{
-		Code:    "1001",
-		Message: "サポートされていません。",
-	})
+	var requestBody schema.RequestDistributionDelete
+	c.ShouldBind(&requestBody)
+	distributionName := c.Param("distribution")
+
+	if distributionName == requestBody.Name {
+		workspace, err := workspaces.NewWSLManagerWorkspace()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, schema.ResponseError{
+				Code:    "500",
+				Message: err.Error(),
+			})
+			return
+		}
+
+		distribution, err := workspace.Find(distributionName)
+		if err != nil {
+			c.JSON(http.StatusNotFound, schema.ResponseError{
+				Code:    "404",
+				Message: err.Error(),
+			})
+			return
+		}
+
+		if err := workspace.Unregister(distribution.Name); err != nil {
+			c.JSON(http.StatusInternalServerError, schema.ResponseError{
+				Code:    "500",
+				Message: err.Error(),
+			})
+		}
+
+		if err := workspace.Fetch(); err != nil {
+			c.JSON(http.StatusInternalServerError, schema.ResponseError{
+				Code:    "500",
+				Message: err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, adaptDistributions((workspace.Distributions)))
+	} else {
+		c.JSON(http.StatusNotFound, schema.ResponseError{
+			Code:    "400",
+			Message: "不正な削除処理を行おうとしました",
+		})
+	}
 }
 
 func adaptDistribution(dist *domainobjects.Distribution) *schema.ResponseDistribution {

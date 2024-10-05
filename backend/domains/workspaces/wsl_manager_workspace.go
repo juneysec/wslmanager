@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"os/exec"
-	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
@@ -123,12 +122,12 @@ func (p *WSLManagerWorkspace) ExecShell(name string) error {
 
 func (p *WSLManagerWorkspace) Export(name string, path string) error {
 	// 拡張子を取得。.tar ではない場合、.tar を付与する
-	extension := strings.ToLower(filepath.Ext(path))
-	if extension != ".tar" {
-		path = path + ".tar"
+	re := regexp.MustCompile(`(?i)tar\.gz$`)
+	if !re.MatchString(path) {
+		path += ".tar.gz"
 	}
 
-	exitCode, output, err := winexec("wsl.exe", "--export", name, path)
+	exitCode, output, err := wincmd("cmd", "/C", "start", "wsl.exe", "--export", name, path)
 	if err != nil {
 		return err
 	}
@@ -142,6 +141,19 @@ func (p *WSLManagerWorkspace) Export(name string, path string) error {
 
 func (p *WSLManagerWorkspace) SetDefault(name string) error {
 	exitCode, output, err := winexec("wsl.exe", "--set-default", name)
+	if err != nil {
+		return err
+	}
+
+	if exitCode != 0 {
+		return fmt.Errorf("wsl.exe returns %v.\noutput is:\n%s", exitCode, output)
+	}
+
+	return nil
+}
+
+func (p *WSLManagerWorkspace) Unregister(name string) error {
+	exitCode, output, err := winexec("wsl.exe", "--unregister", name)
 	if err != nil {
 		return err
 	}
