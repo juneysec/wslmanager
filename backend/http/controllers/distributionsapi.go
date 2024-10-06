@@ -34,7 +34,11 @@ func (p *DistributionsAPI) DistributionsDistributionGet(c *gin.Context) {
 
 	workspace, err := workspaces.NewWSLManagerWorkspace()
 	if err != nil {
-		log.Fatal(err)
+		c.JSON(http.StatusInternalServerError, schema.ResponseError{
+			Code:    "500",
+			Message: err.Error(),
+		})
+		return
 	}
 
 	dist, err := workspace.Find(uriParam.Distribution)
@@ -49,11 +53,37 @@ func (p *DistributionsAPI) DistributionsDistributionGet(c *gin.Context) {
 	c.JSON(http.StatusOK, adaptDistribution(dist))
 }
 
-func (p *DistributionsAPI) DistributionsDistributionPost(c *gin.Context) {
-	c.JSON(http.StatusNotFound, schema.ResponseError{
-		Code:    "1001",
-		Message: "サポートされていません。",
-	})
+// ディストリビューションのインポート
+func (p *DistributionsAPI) DistributionsPost(c *gin.Context) {
+	var requestBody schema.RequestDistributionPost
+	c.ShouldBind(&requestBody)
+
+	workspace, err := workspaces.NewWSLManagerWorkspace()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, schema.ResponseError{
+			Code:    "500",
+			Message: err.Error(),
+		})
+		return
+	}
+	
+	if err := workspace.Import(requestBody.Name, requestBody.VhdPath, requestBody.SourcePath); err != nil {
+		c.JSON(http.StatusInternalServerError, schema.ResponseError{
+			Code:    "500",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	if err := workspace.Fetch(); err != nil {
+		c.JSON(http.StatusInternalServerError, schema.ResponseError{
+			Code:    "500",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, adaptDistributions((workspace.Distributions)))
 }
 
 func (p *DistributionsAPI) DistributionsDistributionPut(c *gin.Context) {

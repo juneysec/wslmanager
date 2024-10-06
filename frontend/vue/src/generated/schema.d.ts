@@ -54,7 +54,61 @@ export interface paths {
             };
         };
         put?: never;
-        post?: never;
+        /**
+         * ディストリビューションをインポートして新規作成する
+         * @description ディストリビューションをインポートして新規作成する
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["request_distribution_post"];
+                };
+            };
+            responses: {
+                /** @description ディストリビューションリスト */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>[];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -169,63 +223,7 @@ export interface paths {
                 };
             };
         };
-        /**
-         * ディストリビューションをインポートして新規作成する
-         * @description ディストリビューションをインポートして新規作成する
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    distribution: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["request_distribution_post"];
-                };
-            };
-            responses: {
-                /** @description ディストリビューションリスト */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": Record<string, never>[];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response_error"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response_error"];
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["response_error"];
-                    };
-                };
-            };
-        };
+        post?: never;
         /**
          * ディストリビューションの削除
          * @description ディストリビューションの削除
@@ -326,6 +324,23 @@ export interface components {
              */
             message?: string;
         };
+        request_distribution_post: {
+            /**
+             * @description ディストリビューションの名前
+             * @example Ubuntu 2
+             */
+            name: string;
+            /**
+             * @description VHDファイルの作成場所
+             * @example c:\wsl\Ubuntu2
+             */
+            vhdPath?: string;
+            /**
+             * @description インポート元のパス
+             * @example c:\wsl\ubuntu2.tar.gz
+             */
+            sourcePath?: string;
+        };
         request_distribution_put: {
             /**
              * @description コマンド
@@ -338,18 +353,6 @@ export interface components {
              * @example c:\wsl\exp1
              */
             path?: string;
-        };
-        request_distribution_post: {
-            /**
-             * @description ディストリビューションの名前
-             * @example Ubuntu 2
-             */
-            name: string;
-            /**
-             * @description インポート元のパス
-             * @example c:\wsl\exp1
-             */
-            path: string;
         };
         request_distribution_delete: {
             /**

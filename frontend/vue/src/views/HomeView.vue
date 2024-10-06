@@ -9,6 +9,7 @@ import NotificationBar, { type Notification } from '../components/NotificationBa
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import InputDialog from '../components/InputDialog.vue'
 import ImportDialog from './ImportDialog.vue'
+import { useDistributionsPost } from '@/composables/distributions-post'
 
 const distributions = ref<Apis.ResponseDistributions>([])
 
@@ -39,6 +40,29 @@ watch(isDistributionsGetFetching, () => {
 
 distributionsGet()
 
+// distributionsPost 関連
+const importDialog = ref()
+const {
+  distributions: distributionsPostData,
+  isFetching: isDistributionsPostFetching,
+  error: distributionsPostError,
+  distributionsPost
+} = useDistributionsPost()
+watch(distributionsPostData, () => [(distributions.value = distributionsPostData.value)])
+watch(distributionsPostError, () => {
+  if (distributionsPostError.value) {
+    notify('error', distributionsPostError.value?.message ?? '', 0)
+  }
+})
+
+const importDistribution = () => {
+  distributionsPost(
+    importDialog.value.distributionName,
+    importDialog.value.importPath,
+    importDialog.value.sourcePath
+  )
+}
+
 // distributionPut 関連
 const {
   distributions: distributionPutData,
@@ -55,6 +79,7 @@ watch(distributionPutError, () => {
   }
 })
 
+// distributionDelete 関連
 const {
   distributions: distributionDeleteData,
   isFetching: isDistributionDeleteFetching,
@@ -133,17 +158,23 @@ const showImportDialog = ref(false)
   <notification-bar v-model="notifications" ref="notification" />
   <loading-dialog
     :isLoading="
-      isDistributionPutFetching || isDistributionsGetFetching || isDistributionDeleteFetching
+      isDistributionPutFetching ||
+      isDistributionsGetFetching ||
+      isDistributionDeleteFetching ||
+      isDistributionsPostFetching
     "
   />
   <confirm-dialog ref="confirmDialog" />
   <input-dialog ref="pathInputDialog" v-model="pathValue" />
   <input-dialog ref="deleteInputDialog" v-model="deleteValue" :validator="deleteValidator" />
-  <import-dialog v-model="showImportDialog" />
+  <import-dialog ref="importDialog" v-model="showImportDialog" :onSubmit="importDistribution" />
 
   <v-sheet
     :loading="
-      isDistributionPutFetching || isDistributionsGetFetching || isDistributionDeleteFetching
+      isDistributionPutFetching ||
+      isDistributionsGetFetching ||
+      isDistributionDeleteFetching ||
+      isDistributionsPostFetching
     "
     variant="tonal"
     class="mx-auto w-auto"

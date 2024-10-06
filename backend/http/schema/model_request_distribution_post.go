@@ -15,6 +15,9 @@ type RequestDistributionPost struct {
   // ディストリビューションの名前
   Name string `json:"name"`
 
+  // VHDファイルの作成場所
+  VhdPath string `json:"vhdPath,omitempty"`
+
   // インポート元のパス
-  Path string `json:"path"`
+  SourcePath string `json:"sourcePath,omitempty"`
 }

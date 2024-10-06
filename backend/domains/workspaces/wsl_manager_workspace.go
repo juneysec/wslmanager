@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 	"regexp"
 	"slices"
@@ -136,6 +137,29 @@ func (p *WSLManagerWorkspace) Export(name string, path string) error {
 		return fmt.Errorf("wsl.exe returns %v.\noutput is:\n%s", exitCode, output)
 	}
 
+	return nil
+}
+
+func (p *WSLManagerWorkspace) Import(name string, vhdPath string, sourcePath string) error {
+	// ソースファイル存在チェック
+	if _, err := os.Stat(sourcePath); os.IsNotExist((err)) {
+		return err
+	}
+
+	// VHD のパスが存在する場合
+	if _, err := os.Stat(vhdPath); err == nil {
+		return fmt.Errorf("VHDパス[%v]は既に存在します。", vhdPath)
+	}
+
+	exitCode, output, err := winexec("cmd", "/C", "start", "wsl.exe", "--import", name, vhdPath, sourcePath, "--version", "2")
+	if err != nil {
+		return err
+	}
+
+	if exitCode != 0 {
+		return fmt.Errorf("wsl.exe returns %v.\noutput is:\n%s", exitCode, output)
+	}
+	
 	return nil
 }
 

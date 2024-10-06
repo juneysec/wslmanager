@@ -10,8 +10,12 @@ components:
           type: string
           description: ディストリビューションの名前
           example: Ubuntu 2
-        path:
+        vhdPath:
+          type: string
+          description: VHDファイルの作成場所
+          example: c:\wsl\Ubuntu2
+        sourcePath:
           type: string
           description: インポート元のパス
-          example: c:\wsl\exp1
+          example: c:\wsl\ubuntu2.tar.gz
 

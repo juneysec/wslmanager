@@ -2,22 +2,40 @@
 import { ref, watch } from 'vue'
 
 const showDialog = defineModel<boolean>()
+const props = defineProps({
+  onSubmit: Function
+})
 
 const distributionName = ref('')
 const importPath = ref('')
 const sourcePath = ref('')
 const canSubmit = ref(false)
+const command = ref('')
 
 const updateCanSubmit = () => {
   canSubmit.value =
     distributionName.value.length > 0 && importPath.value.length > 0 && sourcePath.value.length > 0
+
+  if (canSubmit.value) {
+    command.value = `wsl.exe --import "${distributionName.value}" "${importPath.value}" "${sourcePath.value}"`
+  }
 }
+
+defineExpose({
+  distributionName,
+  importPath,
+  sourcePath
+})
 
 watch(distributionName, updateCanSubmit)
 watch(importPath, updateCanSubmit)
 watch(sourcePath, updateCanSubmit)
 
-const submit = () => {
+const submit = async () => {
+  if (props.onSubmit) {
+    await props.onSubmit()
+  }
+
   showDialog.value = false
 }
 
@@ -49,8 +67,8 @@ const cancel = () => {
         <v-text-field
           v-model="importPath"
           variant="underlined"
-          placeholder="VHDファイルの作成先"
-          label="VHDファイルの作成先"
+          placeholder="VHDファイルの作成先(フォルダを指定)"
+          label="VHDファイルの作成先(フォルダを指定)"
         />
 
         <v-text-field
@@ -60,6 +78,8 @@ const cancel = () => {
           label="インポートファイル"
         />
       </v-form>
+
+      <v-card-text>コマンドプレビュー：{{ command }}</v-card-text>
 
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>

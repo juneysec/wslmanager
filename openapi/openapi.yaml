@@ -40,47 +40,12 @@ paths:
             application/json:
               schema:
                 $ref: './responses/error.yaml#/components/schemas/response_error'
-
-  /distributions/{distribution}:
-    get:
-      tags:
-        - distributions
-      summary: ディストリビューションを取得する
-      description: ディストリビューションを取得する
-      parameters:
-        - name: 'distribution'
-          in: path
-          required: true
-          schema: { type: string }
-      responses:
-        '200':
-          description: ディストリビューション
-          content:
-            application/json:
-              schema:
-                $ref: './responses/distribution.yaml#/components/schemas/response_distribution'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: './responses/error.yaml#/components/schemas/response_error'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: './responses/error.yaml#/components/schemas/response_error'
     post:
       tags:
         - distributions
       summary: ディストリビューションをインポートして新規作成する
       description: ディストリビューションをインポートして新規作成する
-      parameters:
-        - name: 'distribution'
-          in: path
-          required: true
-          schema: { type: string }
+      parameters: []
       requestBody:
         content:
           application/json:
@@ -120,6 +85,38 @@ paths:
             application/json:
               schema:
                 $ref: './responses/error.yaml#/components/schemas/response_error'
+
+  /distributions/{distribution}:
+    get:
+      tags:
+        - distributions
+      summary: ディストリビューションを取得する
+      description: ディストリビューションを取得する
+      parameters:
+        - name: 'distribution'
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: ディストリビューション
+          content:
+            application/json:
+              schema:
+                $ref: './responses/distribution.yaml#/components/schemas/response_distribution'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+
     put:
       tags:
         - distributions
@@ -217,4 +214,4 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './responses/error.yaml#/components/schemas/response_error'               
+                $ref: './responses/error.yaml#/components/schemas/response_error'

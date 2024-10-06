@@ -39,6 +39,51 @@ paths:
       summary: ディストリビューションのリストを取得する
       tags:
       - distributions
+    post:
+      description: ディストリビューションをインポートして新規作成する
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/request_distribution_post'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  example:
+                    isDefault: true
+                    name: Ubuntu
+                    state: Running
+                    version: "2.0"
+                  items:
+                    $ref: '#/components/schemas/response_distribution'
+                  type: array
+                type: array
+          description: ディストリビューションリスト
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_error'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_error'
+          description: Internal Server Error
+      summary: ディストリビューションをインポートして新規作成する
+      tags:
+      - distributions
   /distributions/{distribution}:
     delete:
       description: ディストリビューションの削除
@@ -122,58 +167,6 @@ paths:
                 $ref: '#/components/schemas/response_error'
           description: Internal Server Error
       summary: ディストリビューションを取得する
-      tags:
-      - distributions
-    post:
-      description: ディストリビューションをインポートして新規作成する
-      parameters:
-      - explode: false
-        in: path
-        name: distribution
-        required: true
-        schema:
-          type: string
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/request_distribution_post'
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  example:
-                    isDefault: true
-                    name: Ubuntu
-                    state: Running
-                    version: "2.0"
-                  items:
-                    $ref: '#/components/schemas/response_distribution'
-                  type: array
-                type: array
-          description: ディストリビューションリスト
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/response_error'
-          description: Bad Request
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/response_error'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/response_error'
-          description: Internal Server Error
-      summary: ディストリビューションをインポートして新規作成する
       tags:
       - distributions
     put:
@@ -273,6 +266,24 @@ components:
           example: ディストリビューションが見つかりませんでした。
           type: string
       type: object
+    request_distribution_post:
+      properties:
+        name:
+          description: ディストリビューションの名前
+          example: Ubuntu 2
+          type: string
+        vhdPath:
+          description: VHDファイルの作成場所
+          example: c:\wsl\Ubuntu2
+          type: string
+        sourcePath:
+          description: インポート元のパス
+          example: c:\wsl\ubuntu2.tar.gz
+          type: string
+      required:
+      - name
+      - path
+      type: object
     request_distribution_put:
       properties:
         command:
@@ -291,20 +302,6 @@ components:
           type: string
       required:
       - command
-      type: object
-    request_distribution_post:
-      properties:
-        name:
-          description: ディストリビューションの名前
-          example: Ubuntu 2
-          type: string
-        path:
-          description: インポート元のパス
-          example: c:\wsl\exp1
-          type: string
-      required:
-      - name
-      - path
       type: object
     request_distribution_delete:
       properties:
