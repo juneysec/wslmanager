@@ -1,6 +1,8 @@
 package http
 
 import (
+	"fmt"
+	"os"
 	"path"
 	"path/filepath"
 	"time"
@@ -10,6 +12,8 @@ import (
 )
 
 func Serve() {
+	fmt.Println(os.Args[0])
+
 	r := gin.Default()
 
 	if gin.IsDebugging() {
@@ -43,13 +47,16 @@ func Serve() {
 
 	RegisterRoutes(r)
 
+	r.Static("/assets", "./dist/assets")
 	r.NoRoute(func(c *gin.Context) {
 		_, file := path.Split(c.Request.RequestURI)
 		ext := filepath.Ext(file)
 		//ディレクトリアクセス（ファイル名がない）かパスクエリ（拡張子がない）
 		if file == "" || ext == "" {
-			c.File("./dist" + "/index.html")
+			c.File("./dist/index.html")
 		} else {
+			fmt.Println(c.Request.RequestURI)
+			fmt.Println("./dist" + c.Request.RequestURI)
 			c.File("./dist" + c.Request.RequestURI)
 		}
 	})
