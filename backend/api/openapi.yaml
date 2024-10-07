@@ -227,6 +227,7 @@ components:
       example:
         isDefault: true
         name: Ubuntu
+        vhdPath: C:\WSL\Ubuntu2
         state: Running
         version: "2.0"
       properties:
@@ -245,6 +246,10 @@ components:
         version:
           description: WSLのバージョン
           example: "2.0"
+          type: string
+        vhdPath:
+          description: VHDファイルのベースパス
+          example: C:\WSL\Ubuntu2
           type: string
       required:
       - isDefault

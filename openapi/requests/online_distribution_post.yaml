@@ -1,0 +1,12 @@
+components:
+  schemas:
+    request_online_distribution_post:
+      type: object
+      required:
+        - name
+        - path
+      properties:
+        name:
+          type: string
+          description: ディストリビューションの名前
+          example: Ubuntu

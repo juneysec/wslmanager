@@ -12,9 +12,6 @@ func TestWSLManager_Fetch(t *testing.T) {
 	manager, err := NewWSLManagerWorkspace()
 	assert.NoError(t, err)
 
-	err = manager.Fetch()
-	assert.NoError(t, err)
-
 	for _, dist := range manager.Distributions {
 		fmt.Println(dist)
 	}

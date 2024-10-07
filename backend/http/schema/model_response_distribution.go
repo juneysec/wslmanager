@@ -23,4 +23,7 @@ type ResponseDistribution struct {
 
   // WSLのバージョン
   Version string `json:"version"`
+
+  // VHDファイルのベースパス
+  VhdPath string `json:"vhdPath,omitempty"`
 }

@@ -16,6 +16,9 @@ type Distribution struct {
 
 	// バージョン
 	Version string `json:"version"`
+
+	// VHDのパス
+	VhdPath string `json:"vhdPath"`
 }
 
 // インスタンス生成
@@ -25,6 +28,7 @@ func NewDistribution(isDefault bool, name string, state string, version string) 
 		Name:      name,
 		State:     state,
 		Version:   version,
+		VhdPath:   "",
 	}, nil
 }
 
@@ -35,5 +39,5 @@ func (p *Distribution) String() string {
 		defaultStr = "*"
 	}
 
-	return fmt.Sprintf("%v %v %v %v", defaultStr, p.Name, p.State, p.Version)
+	return fmt.Sprintf("%v %v %v %v %v", defaultStr, p.Name, p.State, p.Version, p.VhdPath)
 }

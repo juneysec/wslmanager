@@ -215,3 +215,77 @@ paths:
             application/json:
               schema:
                 $ref: './responses/error.yaml#/components/schemas/response_error'
+
+  /online-distributions:
+    get:
+      tags:
+        - online-distributions
+      summary: オンラインディストリビューションのリスト取得
+      description: オンラインディストリビューションのリスト取得
+      responses:
+        '200':
+          description: オンラインディストリビューションリスト
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  items:
+                    $ref: './responses/online_distribution.yaml#/components/schemas/response_online_distribution'
+                  example:
+                    isDefault: true
+                    name: 'Ubuntu'
+                    state: 'Running'
+                    version: '2.0'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+    post:
+      tags:
+        - online-distributions
+      summary: オンラインディストリビューションをインストール
+      description: オンラインディストリビューションをインストール
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './requests/online_distribution_post.yaml#/components/schemas/request_online_distribution_post'
+      responses:
+        '200':
+          description: ディストリビューションリスト
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  items:
+                    $ref: './responses/distribution.yaml#/components/schemas/response_distribution'
+                  example:
+                    isDefault: true
+                    name: 'Ubuntu'
+                    state: 'Running'
+                    version: '2.0'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: './responses/error.yaml#/components/schemas/response_error'
+
