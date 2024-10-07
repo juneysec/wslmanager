@@ -47,7 +47,7 @@ func (p *WSLManagerWorkspace) Fetch() error {
 		return err
 	}
 
-	_, output, err := winexec("wsl.exe", "-l", "-v")
+	_, output, err := execUTF16("wsl.exe", "-l", "-v")
 	if err != nil {
 		log.Println("failed to call winexec:", err)
 		return err
@@ -70,11 +70,11 @@ func (p *WSLManagerWorkspace) Fetch() error {
 		}
 	}
 
-	return nil
+	return p.fetchVHDPath()
 }
 
 func (p *WSLManagerWorkspace) Find(name string) (*domainobjects.Distribution, error) {
-	idx := slices.IndexFunc(p.Distributions, func (d *domainobjects.Distribution) bool { return d.Name == name}) 
+	idx := slices.IndexFunc(p.Distributions, func(d *domainobjects.Distribution) bool { return d.Name == name })
 	if idx < 0 {
 		return nil, fmt.Errorf("ディストリビューション[%s] は存在しません。", name)
 	}
@@ -83,7 +83,7 @@ func (p *WSLManagerWorkspace) Find(name string) (*domainobjects.Distribution, er
 }
 
 func (p *WSLManagerWorkspace) Start(name string) error {
-	exitCode, output, err := winexec("wsl.exe", "-d", name, "-e", "echo", "hello")
+	exitCode, output, err := execUTF16("wsl.exe", "-d", name, "-e", "echo", "hello")
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func (p *WSLManagerWorkspace) Start(name string) error {
 }
 
 func (p *WSLManagerWorkspace) Stop(name string) error {
-	exitCode, output, err := winexec("wsl.exe", "-t", name)
+	exitCode, output, err := execUTF16("wsl.exe", "-t", name)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (p *WSLManagerWorkspace) Stop(name string) error {
 }
 
 func (p *WSLManagerWorkspace) ExecShell(name string) error {
-	exitCode, output, err := wincmd("cmd", "/C", "start", "wsl.exe", "-d", name)
+	exitCode, output, err := execNoWaitUTF16("cmd", "/C", "start", "wsl.exe", "-d", name)
 	if err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func (p *WSLManagerWorkspace) Export(name string, path string) error {
 		path += ".tar.gz"
 	}
 
-	exitCode, output, err := wincmd("cmd", "/C", "start", "wsl.exe", "--export", name, path)
+	exitCode, output, err := execNoWaitUTF16("cmd", "/C", "start", "wsl.exe", "--export", name, path)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func (p *WSLManagerWorkspace) Import(name string, vhdPath string, sourcePath str
 		return fmt.Errorf("VHDパス[%v]は既に存在します。", vhdPath)
 	}
 
-	exitCode, output, err := winexec("cmd", "/C", "start", "wsl.exe", "--import", name, vhdPath, sourcePath, "--version", "2")
+	exitCode, output, err := execUTF16("cmd", "/C", "start", "wsl.exe", "--import", name, vhdPath, sourcePath, "--version", "2")
 	if err != nil {
 		return err
 	}
@@ -159,12 +159,12 @@ func (p *WSLManagerWorkspace) Import(name string, vhdPath string, sourcePath str
 	if exitCode != 0 {
 		return fmt.Errorf("wsl.exe returns %v.\noutput is:\n%s", exitCode, output)
 	}
-	
+
 	return nil
 }
 
 func (p *WSLManagerWorkspace) SetDefault(name string) error {
-	exitCode, output, err := winexec("wsl.exe", "--set-default", name)
+	exitCode, output, err := execUTF16("wsl.exe", "--set-default", name)
 	if err != nil {
 		return err
 	}
@@ -176,14 +176,50 @@ func (p *WSLManagerWorkspace) SetDefault(name string) error {
 	return nil
 }
 
+// ディストリビューションの削除
 func (p *WSLManagerWorkspace) Unregister(name string) error {
-	exitCode, output, err := winexec("wsl.exe", "--unregister", name)
+	exitCode, output, err := execUTF16("wsl.exe", "--unregister", name)
 	if err != nil {
 		return err
 	}
 
 	if exitCode != 0 {
 		return fmt.Errorf("wsl.exe returns %v.\noutput is:\n%s", exitCode, output)
+	}
+
+	return nil
+}
+
+// VHDファイル情報の取得
+func (p *WSLManagerWorkspace) fetchVHDPath() error {
+	re, err := regexp.Compile(`([^\s]+)[\s]+([^\s]+)`)
+	if err != nil {
+		log.Println("failed to compile regexp:", err)
+		return err
+	}
+
+	///_, output, err := execUTF8("powershell.exe", "-Command", "chcp 65001; Write-Host 'ほげ'")
+	_, output, err := execUTF8("powershell.exe", "-Command", "chcp 65001; (Get-ChildItem -Path HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Lxss | Select-Object @{ Name = 'DistributionName'; Expression={$_.GetValue('DistributionName')} }, @{ Name = 'Path'; Expression={$_.GetValue('BasePath')} })")
+	if err != nil {
+		log.Println("failed to call winexec:", err)
+		return err
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(output))
+	if scanner.Scan() { // 1行目スキップ
+		for scanner.Scan() {
+			line := scanner.Text()
+
+			matches := re.FindStringSubmatch(line)
+			if len(matches) > 0 {
+				distributionName := matches[1]
+				vhdPath := matches[2]
+
+				if found, err := p.Find(distributionName); err == nil {
+					found.VhdPath = vhdPath
+				}
+			}
+		}
 	}
 
 	return nil
@@ -191,7 +227,29 @@ func (p *WSLManagerWorkspace) Unregister(name string) error {
 
 // コマンド実行
 // Windows の場合、StdOut が UTF-16 になるのでUTF-8に変換して返す。
-func winexec(name string, arg ...string) (int, string, error) {
+func execUTF8(name string, arg ...string) (int, string, error) {
+	cmd := exec.Command(name, arg...)
+
+	output, err := cmd.Output()
+	if err != nil {
+		log.Printf("failed to call exec.Command(%v).Output: %v", name, err)
+		return -1, "", err
+	}
+
+	utf16Reader := transform.NewReader(bytes.NewReader(output), unicode.UTF8.NewDecoder())
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, utf16Reader)
+	if err != nil {
+		log.Printf("failed to call io.Copy(): %v", err)
+		return -1, "", err
+	}
+
+	return cmd.ProcessState.ExitCode(), buf.String(), nil
+}
+
+// コマンド実行
+// Windows の場合、StdOut が UTF-16 になるのでUTF-8に変換して返す。
+func execUTF16(name string, arg ...string) (int, string, error) {
 	cmd := exec.Command(name, arg...)
 
 	output, err := cmd.Output()
@@ -211,9 +269,9 @@ func winexec(name string, arg ...string) (int, string, error) {
 	return cmd.ProcessState.ExitCode(), buf.String(), nil
 }
 
-// コマンド実行
+// コマンド実行(終了を待機しない)
 // Windows の場合、StdOut が UTF-16 になるのでUTF-8に変換して返す。
-func wincmd(name string, arg ...string) (int, string, error) {
+func execNoWaitUTF16(name string, arg ...string) (int, string, error) {
 	cmd := exec.Command(name, arg...)
 	err := cmd.Start()
 	if err != nil {

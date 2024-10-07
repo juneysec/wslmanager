@@ -29,3 +29,7 @@ components:
           type: string
           description: WSLのバージョン
           example: 2.0
+        vhdPath:
+          type: string
+          description: VHDファイルのベースパス
+          example: C:\WSL\Ubuntu2

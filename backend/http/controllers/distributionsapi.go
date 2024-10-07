@@ -44,7 +44,7 @@ func (p *DistributionsAPI) DistributionsDistributionGet(c *gin.Context) {
 	dist, err := workspace.Find(uriParam.Distribution)
 	if err != nil {
 		c.JSON(http.StatusNotFound, schema.ResponseError{
-			Code: "404",
+			Code:    "404",
 			Message: "Not Found",
 		})
 		return
@@ -66,7 +66,7 @@ func (p *DistributionsAPI) DistributionsPost(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	if err := workspace.Import(requestBody.Name, requestBody.VhdPath, requestBody.SourcePath); err != nil {
 		c.JSON(http.StatusInternalServerError, schema.ResponseError{
 			Code:    "500",
@@ -94,7 +94,7 @@ func (p *DistributionsAPI) DistributionsDistributionPut(c *gin.Context) {
 
 	if len(distributionName) == 0 {
 		c.JSON(http.StatusBadRequest, schema.ResponseError{
-			Code: "101",
+			Code:    "101",
 			Message: "不正なリクエスト",
 		})
 		return
@@ -118,12 +118,12 @@ func (p *DistributionsAPI) DistributionsDistributionPut(c *gin.Context) {
 		return
 	}
 
-	switch (requestBody.Command) {
-	case "start":  // 起動
+	switch requestBody.Command {
+	case "start": // 起動
 		err = workspace.Start(distribution.Name)
-	case "stop":   // 停止
+	case "stop": // 停止
 		err = workspace.Stop(distribution.Name)
-	case "shell":  // シェル起動
+	case "shell": // シェル起動
 		err = workspace.ExecShell(distribution.Name)
 	case "export": // エクスポート
 		err = workspace.Export(distribution.Name, requestBody.Path)
@@ -210,6 +210,7 @@ func adaptDistribution(dist *domainobjects.Distribution) *schema.ResponseDistrib
 		Name:      dist.Name,
 		State:     dist.State,
 		Version:   dist.Version,
+		VhdPath:   dist.VhdPath,
 	}
 }
 
@@ -222,4 +223,3 @@ func adaptDistributions(dist []*domainobjects.Distribution) []*schema.ResponseDi
 
 	return distributions
 }
-
