@@ -1,0 +1,86 @@
+{
+  "github.com/gabriel-vasile/mimetype": {
+    "LicenseName": "MIT",
+    "LicenseURL": "https://github.com/gabriel-vasile/mimetype/blob/v1.4.5/LICENSE"
+  },
+
+  "github.com/gin-contrib/cors": {
+    "LicenseName": "MIT",
+    "LicenseURL": "https://github.com/gin-contrib/cors/blob/v1.7.2/LICENSE"
+  },
+
+  "github.com/gin-contrib/sse": {
+    "LicenseName": "MIT",
+    "LicenseURL": "https://github.com/gin-contrib/sse/blob/v0.1.0/LICENSE"
+  },
+
+  "github.com/gin-gonic/gin": {
+    "LicenseName": "MIT",
+    "LicenseURL": "https://github.com/gin-gonic/gin/blob/v1.10.0/LICENSE"
+  },
+
+  "github.com/go-playground/locales": {
+    "LicenseName": "MIT",
+    "LicenseURL": "https://github.com/go-playground/locales/blob/v0.14.1/LICENSE"
+  },
+
+  "github.com/go-playground/universal-translator": {
+    "LicenseName": "MIT",
+    "LicenseURL": "https://github.com/go-playground/universal-translator/blob/v0.18.1/LICENSE"
+  },
+
+  "github.com/go-playground/validator/v10": {
+    "LicenseName": "MIT",
+    "LicenseURL": "https://github.com/go-playground/validator/blob/v10.22.1/LICENSE"
+  },
+
+  "github.com/leodido/go-urn": {
+    "LicenseName": "MIT",
+    "LicenseURL": "https://github.com/leodido/go-urn/blob/v1.4.0/LICENSE"
+  },
+
+  "github.com/mattn/go-isatty": {
+    "LicenseName": "MIT",
+    "LicenseURL": "https://github.com/mattn/go-isatty/blob/v0.0.20/LICENSE"
+  },
+
+  "github.com/pelletier/go-toml/v2": {
+    "LicenseName": "MIT",
+    "LicenseURL": "https://github.com/pelletier/go-toml/blob/v2.2.3/LICENSE"
+  },
+
+  "github.com/ugorji/go/codec": {
+    "LicenseName": "MIT",
+    "LicenseURL": "https://github.com/ugorji/go/blob/codec/v1.2.12/codec/LICENSE"
+  },
+
+  "golang.org/x/crypto/sha3": {
+    "LicenseName": "BSD-3-Clause",
+    "LicenseURL": "https://cs.opensource.google/go/x/crypto/+/v0.27.0:LICENSE"
+  },
+
+  "golang.org/x/net": {
+    "LicenseName": "BSD-3-Clause",
+    "LicenseURL": "https://cs.opensource.google/go/x/net/+/v0.29.0:LICENSE"
+  },
+
+  "golang.org/x/sys/cpu": {
+    "LicenseName": "BSD-3-Clause",
+    "LicenseURL": "https://cs.opensource.google/go/x/sys/+/v0.25.0:LICENSE"
+  },
+
+  "golang.org/x/text": {
+    "LicenseName": "BSD-3-Clause",
+    "LicenseURL": "https://cs.opensource.google/go/x/text/+/v0.18.0:LICENSE"
+  },
+
+  "google.golang.org/protobuf": {
+    "LicenseName": "BSD-3-Clause",
+    "LicenseURL": "https://github.com/protocolbuffers/protobuf-go/blob/v1.34.2/LICENSE"
+  },
+
+  "gopkg.in/yaml.v3": {
+    "LicenseName": "MIT",
+    "LicenseURL": "https://github.com/go-yaml/yaml/blob/v3.0.1/LICENSE"
+  }
+}

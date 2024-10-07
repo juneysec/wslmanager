@@ -8,6 +8,9 @@ export type ResponseDistributions =
 export type ResponseDistribution =
   schemas['/distributions/{distribution}']['get']['responses']['200']['content']['application/json']
 
+export type ResponseOnlineDistributions =
+  schemas['/online-distributions']['get']['responses']['200']['content']['application/json']
+
 const client = createClient<schemas>({
   baseUrl: import.meta.env.PROD ? '/api/v1' : 'http://localhost:8080/api/v1'
 })

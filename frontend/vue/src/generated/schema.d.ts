@@ -286,6 +286,108 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/online-distributions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * オンラインディストリビューションのリスト取得
+         * @description オンラインディストリビューションのリスト取得
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description オンラインディストリビューションリスト */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>[];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * オンラインディストリビューションをインストール
+         * @description オンラインディストリビューションをインストール
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["request_online_distribution_post"];
+                };
+            };
+            responses: {
+                /** @description ディストリビューションリスト */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": Record<string, never>[];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["response_error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -311,6 +413,11 @@ export interface components {
              * @example 2
              */
             version: string;
+            /**
+             * @description VHDファイルのベースパス
+             * @example C:\WSL\Ubuntu2
+             */
+            vhdPath?: string;
         };
         response_error: {
             /**
@@ -357,6 +464,30 @@ export interface components {
         request_distribution_delete: {
             /**
              * @description ディストリビューション名
+             * @example Ubuntu
+             */
+            name: string;
+        };
+        response_online_distribution: {
+            /**
+             * @description ディストリビューション名
+             * @example Debian
+             */
+            name: string;
+            /**
+             * @description フレンドリー名
+             * @example Debian GNU/Linux
+             */
+            friendlyName?: string;
+            /**
+             * @description 既にインストールされている場合は true
+             * @example true
+             */
+            alreadyInstalled?: boolean;
+        };
+        request_online_distribution_post: {
+            /**
+             * @description ディストリビューションの名前
              * @example Ubuntu
              */
             name: string;

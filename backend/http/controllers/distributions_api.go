@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +21,11 @@ type uriParameter struct {
 func (p *DistributionsAPI) DistributionsGet(c *gin.Context) {
 	workspace, err := workspaces.NewWSLManagerWorkspace()
 	if err != nil {
-		log.Fatal(err)
+		c.JSON(http.StatusInternalServerError, schema.ResponseError{
+			Code:    "500",
+			Message: err.Error(),
+		})
+		return
 	}
 
 	c.JSON(http.StatusOK, adaptDistributions((workspace.Distributions)))
@@ -83,7 +86,7 @@ func (p *DistributionsAPI) DistributionsPost(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, adaptDistributions((workspace.Distributions)))
+	c.JSON(http.StatusOK, adaptDistributions(workspace.Distributions))
 }
 
 func (p *DistributionsAPI) DistributionsDistributionPut(c *gin.Context) {

@@ -9,6 +9,7 @@ import NotificationBar, { type Notification } from '../components/NotificationBa
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import InputDialog from '../components/InputDialog.vue'
 import ImportDialog from './ImportDialog.vue'
+import InstallDialog from './InstallDialog.vue'
 import { useDistributionsPost } from '@/composables/distributions-post'
 
 const distributions = ref<Apis.ResponseDistributions>([])
@@ -110,6 +111,9 @@ const stop = async (distribution: string) => {
   }
 }
 
+// インストールダイアログ
+const installDialog = ref()
+
 // 入力ダイアログ関連
 const pathInputDialog = ref()
 const pathValue = ref('')
@@ -137,7 +141,7 @@ const deleteDistribution = async (distribution: string) => {
 
   if (
     await deleteInputDialog.value.open(
-      `${distribution}を削除します。\nこの操作が間違いでない場合、下の入力ボックスに ${distribution} と入力してOKを押してください。`,
+      `${distribution}を削除します。\nこの操作が間違いでない場合、下の入力ボックスに ${distribution} と入力してOKを押してください。\n※完全に削除するには、プログラムの追加と削除からディストリビューションをアンインストールしてください。`,
       `${distribution}`
     )
   ) {
@@ -155,8 +159,8 @@ const showImportDialog = ref(false)
 </script>
 
 <template>
-  <notification-bar v-model="notifications" ref="notification" />
-  <loading-dialog
+  <NotificationBar v-model="notifications" ref="notification" />
+  <LoadingDialog
     :isLoading="
       isDistributionPutFetching ||
       isDistributionsGetFetching ||
@@ -164,10 +168,23 @@ const showImportDialog = ref(false)
       isDistributionsPostFetching
     "
   />
-  <confirm-dialog ref="confirmDialog" />
-  <input-dialog ref="pathInputDialog" v-model="pathValue" />
-  <input-dialog ref="deleteInputDialog" v-model="deleteValue" :validator="deleteValidator" />
-  <import-dialog ref="importDialog" v-model="showImportDialog" :onSubmit="importDistribution" />
+  <ConfirmDialog ref="confirmDialog" />
+  <InputDialog ref="pathInputDialog" v-model="pathValue" />
+  <InputDialog ref="deleteInputDialog" v-model="deleteValue" :validator="deleteValidator" />
+  <ImportDialog ref="importDialog" v-model="showImportDialog" :onSubmit="importDistribution" />
+  <InstallDialog ref="installDialog" :onClose="distributionsGet" />
+
+  <v-layout-item model-value position="bottom" class="text-right" size="88">
+    <div class="ma-4">
+      <v-btn
+        icon="mdi-plus"
+        size="large"
+        color="primary"
+        elevation="8"
+        @click="installDialog.open()"
+      />
+    </div>
+  </v-layout-item>
 
   <v-sheet
     :loading="
@@ -216,107 +233,129 @@ const showImportDialog = ref(false)
       </thead>
 
       <tbody>
-        <tr v-for="item in distributions" :key="item.name">
-          <td>
-            <v-container v-if="item.isDefault" class="text-right">*</v-container>
-          </td>
-          <td>{{ item.name }}</td>
-          <td>{{ item.version }}</td>
-          <td>
-            <v-container :class="[item.state == 'Running' ? 'play' : 'stop']">{{
-              item.state
-            }}</v-container>
-          </td>
-          <td>
-            <v-tooltip :text="item.name + 'を起動する'">
-              <template v-slot:activator="{ props }">
-                <v-btn
-                  icon="mdi-play"
-                  class="play smbtn"
-                  :disabled="item.state == 'Running'"
-                  v-bind="props"
-                  variant="text"
-                  @click="distributionPut(item.name!, 'start')"
-                />
-              </template>
-            </v-tooltip>
-          </td>
-          <td>
-            <v-tooltip :text="item.name + 'を停止する'">
-              <template v-slot:activator="{ props }">
-                <v-btn
-                  icon="mdi-stop"
-                  class="stop smbtn"
-                  :disabled="item.state == 'Stopped'"
-                  v-bind="props"
-                  variant="text"
-                  @click="stop(item.name!)"
-                />
-              </template>
-            </v-tooltip>
-          </td>
-          <td>
-            <!-- bash 起動 -->
-            <v-tooltip :text="item.name + 'の bash を起動する'">
-              <template v-slot:activator="{ props }">
-                <v-btn
-                  icon="mdi-bash"
-                  variant="text"
-                  class="smbtn"
-                  v-bind="props"
-                  @click="distributionPut(item.name!, 'shell')"
-                />
-              </template>
-            </v-tooltip>
-          </td>
-
-          <!-- デフォルトに設定 -->
-          <td>
-            <v-tooltip :text="item.name + 'をデフォルトに設定する'">
-              <template v-slot:activator="{ props }">
-                <v-container v-if="!item.isDefault" class="text-left"
-                  ><v-btn
-                    icon="mdi-asterisk"
+        <template v-for="item in distributions" :key="item.name">
+          <tr class="upper-row">
+            <td>
+              <v-container v-if="item.isDefault" class="text-right">*</v-container>
+            </td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.version }}</td>
+            <td>
+              <v-container :class="[item.state == 'Running' ? 'play' : 'stop']">{{
+                item.state
+              }}</v-container>
+            </td>
+            <td>
+              <v-tooltip :text="item.name + 'を起動する'">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    icon="mdi-play"
+                    class="play smbtn"
+                    :disabled="item.state != 'Stopped'"
+                    v-bind="props"
+                    variant="text"
+                    @click="distributionPut(item.name!, 'start')"
+                  />
+                </template>
+              </v-tooltip>
+            </td>
+            <td>
+              <v-tooltip :text="item.name + 'を停止する'">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    icon="mdi-stop"
+                    class="stop smbtn"
+                    :disabled="item.state !== 'Running'"
+                    v-bind="props"
+                    variant="text"
+                    @click="stop(item.name!)"
+                  />
+                </template>
+              </v-tooltip>
+            </td>
+            <td>
+              <!-- bash 起動 -->
+              <v-tooltip :text="item.name + 'の bash を起動する'">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    icon="mdi-bash"
+                    variant="text"
                     class="smbtn"
+                    v-bind="props"
+                    @click="distributionPut(item.name!, 'shell')"
+                  />
+                </template>
+              </v-tooltip>
+            </td>
+
+            <!-- デフォルトに設定 -->
+            <td>
+              <v-tooltip :text="item.name + 'をデフォルトに設定する'">
+                <template v-slot:activator="{ props }">
+                  <v-container v-if="!item.isDefault" class="text-left"
+                    ><v-btn
+                      icon="mdi-asterisk"
+                      class="smbtn"
+                      variant="text"
+                      v-bind="props"
+                      @click="distributionPut(item.name!, 'set-default')"
+                    ></v-btn>
+                  </v-container>
+                </template>
+              </v-tooltip>
+            </td>
+
+            <td>
+              <!-- エクスポート -->
+              <v-tooltip :text="item.name + 'をエクスポートする...'">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    icon="mdi-export"
+                    variant="text"
+                    class="smbtn"
+                    v-bind="props"
+                    @click="exportDistribution(item.name!)"
+                  />
+                </template>
+              </v-tooltip>
+            </td>
+            <td>
+              <!-- 削除 -->
+              <v-tooltip :text="item.name + 'を削除する...'">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    icon="mdi-delete"
+                    class="del smbtn"
+                    :disabled="item.state == 'Running'"
                     variant="text"
                     v-bind="props"
-                    @click="distributionPut(item.name!, 'set-default')"
-                  ></v-btn>
-                </v-container>
-              </template>
-            </v-tooltip>
-          </td>
-
-          <td>
-            <!-- エクスポート -->
-            <v-tooltip :text="item.name + 'をエクスポートする...'">
-              <template v-slot:activator="{ props }">
-                <v-btn
-                  icon="mdi-export"
-                  variant="text"
-                  class="smbtn"
-                  v-bind="props"
-                  @click="exportDistribution(item.name!)"
-                />
-              </template>
-            </v-tooltip>
-          </td>
-          <td>
-            <!-- 削除 -->
-            <v-tooltip :text="item.name + 'を削除する...'">
-              <template v-slot:activator="{ props }">
-                <v-btn
-                  icon="mdi-delete"
-                  class="del smbtn"
-                  :disabled="item.state == 'Running'"
-                  variant="text"
-                  v-bind="props"
-                  @click="deleteDistribution(item.name!)"
-                />
-              </template>
-            </v-tooltip>
-          </td>
-        </tr>
+                    @click="deleteDistribution(item.name!)"
+                  />
+                </template>
+              </v-tooltip>
+            </td>
+          </tr>
+          <tr class="down-row">
+            <td></td>
+            <td colspan="8">
+              <div class="mx-4">VHDパス: {{ item.vhdPath }}</div>
+            </td>
+            <td>
+              <!-- <v-tooltip :text="item.name + 'のVHDパスを移動する...'">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    icon="mdi-folder-move"
+                    class="smbtn"
+                    :disabled="item.state !== 'Stopped'"
+                    variant="text"
+                    v-bind="props"
+                    @click=""
+                  />
+                </template>
+              </v-tooltip> -->
+            </td>
+          </tr>
+        </template>
       </tbody>
     </v-table>
   </v-sheet>
@@ -338,6 +377,14 @@ const showImportDialog = ref(false)
 .smbtn {
   width: 2em !important;
   height: 2em !important;
+}
+
+.upper-row > td {
+  border-bottom: 0 !important;
+}
+
+.down-row > td {
+  border-top: 0 !important;
 }
 
 .notifier {

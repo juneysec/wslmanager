@@ -19,7 +19,7 @@ mvn package -DskipTests=true
 ## コード生成
 
 ```shell
-java -cp ./openapi-generator-cli.jar:./src/target/go-custom-server-openapi-generator-1.0.0.jar org.openapitools.codegen.OpenAPIGenerator generate -g go-custom-server -i ./src/api/openapi.yaml -o ./src/gen
+java -cp ./openapi-generator-cli.jar:./src/target/go-custom-server-openapi-generator-1.0.0.jar org.openapitools.codegen.OpenAPIGenerator generate -g go-custom-server -i ./src/openapi/openapi.yaml -o ./src/gen
 ```
 
 ## 参考

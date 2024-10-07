@@ -190,6 +190,66 @@ func (p *WSLManagerWorkspace) Unregister(name string) error {
 	return nil
 }
 
+// オンラインディストリビューションのリストを取得
+func (p* WSLManagerWorkspace) GetOnlineDistributions() ([]*domainobjects.OnlineDistribution, error) {
+	reHeader, _ := regexp.Compile(`(NAME)[\s]+(FRIENDLY NAME)`)
+	re, _ := regexp.Compile(`([^\s]+)[\s]+(.+)`)
+
+	_, output, err := execUTF16("wsl.exe", "-l", "-o")
+	if err != nil {
+		log.Println("failed to call winexec:", err)
+		return nil, err
+	}
+
+	var retval []*domainobjects.OnlineDistribution
+	scanner := bufio.NewScanner(strings.NewReader(output))
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		matches := reHeader.FindStringSubmatch(line)
+		if len(matches) > 0 {
+			break
+		}
+	}
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		matches := re.FindStringSubmatch(line)
+		if len(matches) > 0 {
+			distribution := matches[1]
+			friendlyName := matches[2]
+			alreadyInstalled := false
+
+			if found, _ := p.Find(distribution); found != nil {
+				alreadyInstalled = true
+			}
+
+			od, err := domainobjects.NewOnlineDistribution(distribution, friendlyName, alreadyInstalled)
+			if err != nil {
+				return nil, err
+			}
+
+			retval = append(retval, od)
+		}
+	}
+
+	return retval, nil
+}
+
+func (p *WSLManagerWorkspace) InstallOnlineDistribution(name string) error {
+	exitCode, output, err := execUTF16("cmd.exe", "/C", "start", "wsl.exe", "--install", name)
+	if err != nil {
+		return err
+	}
+
+	if exitCode != 0 {
+		return fmt.Errorf("wsl.exe returns %v.\noutput is:\n%s", exitCode, output)
+	}
+
+	return nil
+}
+
 // VHDファイル情報の取得
 func (p *WSLManagerWorkspace) fetchVHDPath() error {
 	re, err := regexp.Compile(`([^\s]+)[\s]+([^\s]+)`)

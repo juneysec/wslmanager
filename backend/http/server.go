@@ -3,6 +3,7 @@ package http
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"time"
@@ -43,6 +44,8 @@ func Serve() {
 			// https://godoc.org/github.com/gin-contrib/cors#Config の中のコメントに詳細あり
 			MaxAge: 24 * time.Hour,
 		}))
+	} else {
+		exec.Command("cmd.exe", "/C", "start", "http://localhost:8080").Start()
 	}
 
 	RegisterRoutes(r)

@@ -23,6 +23,11 @@ type DistributionsAPIController interface {
   DistributionsPost(*gin.Context)
 }
 
+type OnlineDistributionsAPIController interface { 
+  OnlineDistributionsGet(*gin.Context)
+  OnlineDistributionsPost(*gin.Context)
+}
+
 func registerDistributionsAPIRoutes(e *gin.Engine, r DistributionsAPIController) {
   e.DELETE("/api/v1/distributions/:distribution", r.DistributionsDistributionDelete)
   e.GET("/api/v1/distributions/:distribution", r.DistributionsDistributionGet)
@@ -31,6 +36,12 @@ func registerDistributionsAPIRoutes(e *gin.Engine, r DistributionsAPIController)
   e.POST("/api/v1/distributions", r.DistributionsPost)
 }
 
+func registerOnlineDistributionsAPIRoutes(e *gin.Engine, r OnlineDistributionsAPIController) {
+  e.GET("/api/v1/online-distributions", r.OnlineDistributionsGet)
+  e.POST("/api/v1/online-distributions", r.OnlineDistributionsPost)
+}
+
 func RegisterRoutes(e *gin.Engine) {
   registerDistributionsAPIRoutes(e, &controllers.DistributionsAPI{})
+  registerOnlineDistributionsAPIRoutes(e, &controllers.OnlineDistributionsAPI{})
 }

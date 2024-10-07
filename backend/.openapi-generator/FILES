@@ -3,5 +3,7 @@ http/routers.go
 http/schema/model_request_distribution_delete.go
 http/schema/model_request_distribution_post.go
 http/schema/model_request_distribution_put.go
+http/schema/model_request_online_distribution_post.go
 http/schema/model_response_distribution.go
 http/schema/model_response_error.go
+http/schema/model_response_online_distribution.go

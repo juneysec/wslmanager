@@ -21,3 +21,7 @@ components:
           type: string
           description: フレンドリー名
           example: Debian GNU/Linux
+        alreadyInstalled:
+          type: boolean
+          description: 既にインストールされている場合は true
+          example: true

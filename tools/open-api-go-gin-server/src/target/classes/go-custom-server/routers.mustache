@@ -15,5 +15,5 @@ func register{{classname}}Routes(e *gin.Engine, r {{classname}}Controller) {
 {{/operation}}{{/operations}}}
 {{/apis}}{{/apiInfo}}
 func RegisterRoutes(e *gin.Engine) {
-  {{#apiInfo}}{{#apis}}register{{classname}}Routes(e, &controllers.{{classname}}{})
+{{#apiInfo}}{{#apis}}  register{{classname}}Routes(e, &controllers.{{classname}}{})
 {{/apis}}{{/apiInfo}}}

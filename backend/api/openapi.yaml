@@ -221,6 +221,78 @@ paths:
       summary: ディストリビューションのコマンド実行
       tags:
       - distributions
+  /online-distributions:
+    get:
+      description: オンラインディストリビューションのリスト取得
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  example:
+                    isDefault: true
+                    name: Ubuntu
+                    state: Running
+                    version: "2.0"
+                  items:
+                    $ref: '#/components/schemas/response_online_distribution'
+                  type: array
+                type: array
+          description: オンラインディストリビューションリスト
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_error'
+          description: Internal Server Error
+      summary: オンラインディストリビューションのリスト取得
+      tags:
+      - online-distributions
+    post:
+      description: オンラインディストリビューションをインストール
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/request_online_distribution_post'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  example:
+                    isDefault: true
+                    name: Ubuntu
+                    state: Running
+                    version: "2.0"
+                  items:
+                    $ref: '#/components/schemas/response_distribution'
+                  type: array
+                type: array
+          description: ディストリビューションリスト
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_error'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_error'
+          description: Internal Server Error
+      summary: オンラインディストリビューションをインストール
+      tags:
+      - online-distributions
 components:
   schemas:
     response_distribution:
@@ -316,4 +388,34 @@ components:
           type: string
       required:
       - name
+      type: object
+    response_online_distribution:
+      properties:
+        name:
+          description: ディストリビューション名
+          example: Debian
+          type: string
+        friendlyName:
+          description: フレンドリー名
+          example: Debian GNU/Linux
+          type: string
+        alreadyInstalled:
+          description: 既にインストールされている場合は true
+          example: true
+          type: boolean
+      required:
+      - isDefault
+      - name
+      - state
+      - version
+      type: object
+    request_online_distribution_post:
+      properties:
+        name:
+          description: ディストリビューションの名前
+          example: Ubuntu
+          type: string
+      required:
+      - name
+      - path
       type: object
