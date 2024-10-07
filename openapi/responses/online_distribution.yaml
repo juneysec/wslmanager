@@ -1,0 +1,23 @@
+# VSCode: Shift + Alt + P
+info:
+  title: WSLManager API
+  version: '1.0'
+  description: 'オンライン(インストール可能な)ディストリビューション'
+components:
+  schemas:
+    response_online_distribution:
+      type: object
+      required:
+        - isDefault
+        - name
+        - state
+        - version
+      properties:
+        name:
+          type: string
+          description: ディストリビューション名
+          example: Debian
+        friendlyName:
+          type: string
+          description: フレンドリー名
+          example: Debian GNU/Linux
