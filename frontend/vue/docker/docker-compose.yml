@@ -1,11 +1,11 @@
 services:
   nodejs:
     build:
-        context: .
+      context: .
     tty: true
     volumes:
       - ../:/home/developer/src:cached
       - ../../../openapi:/home/developer/src/openapi
+      - ../../../backend/dist:/home/developer/src/dist
     ports:
       - 5173:5173
-

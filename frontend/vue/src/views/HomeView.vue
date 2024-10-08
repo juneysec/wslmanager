@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import * as Apis from '../apis'
-import { useDistributionsGet } from '../composables/distributions-get'
-import { useDistributionPut } from '../composables/distribution-put'
+import { useDistributionsGet } from '@/composables/distributions-get'
+import { useDistributionPut } from '@/composables/distribution-put'
 import { useDistributionDelete } from '@/composables/distribution-delete'
-import LoadingDialog from '../components/LoadingDialog.vue'
-import NotificationBar, { type Notification } from '../components/NotificationBar.vue'
-import ConfirmDialog from '../components/ConfirmDialog.vue'
-import InputDialog from '../components/InputDialog.vue'
-import ImportDialog from './ImportDialog.vue'
-import InstallDialog from './InstallDialog.vue'
+import LoadingDialog from '@/components/LoadingDialog.vue'
+import NotificationBar, { type Notification } from '@/components/NotificationBar.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import InputDialog from '@/components/InputDialog.vue'
+import ImportDialog from '@/views/dialogs/ImportDialog.vue'
+import InstallDialog from '@/views/dialogs/InstallDialog.vue'
 import { useDistributionsPost } from '@/composables/distributions-post'
 
 const distributions = ref<Apis.ResponseDistributions>([])

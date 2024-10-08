@@ -1,6 +1,6 @@
 import { ref } from 'vue'
-import client from '../apis'
-import * as Api from '../apis'
+import client from '@/apis'
+import * as Api from '@/apis'
 
 // リスト取得
 export const useOnlineDistributionsGet = () => {
