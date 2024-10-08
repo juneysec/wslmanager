@@ -301,6 +301,7 @@ components:
         name: Ubuntu
         vhdPath: C:\WSL\Ubuntu2
         state: Running
+        vhdSize: 1056250135
         version: "2.0"
       properties:
         isDefault:
@@ -323,6 +324,10 @@ components:
           description: VHDファイルのベースパス
           example: C:\WSL\Ubuntu2
           type: string
+        vhdSize:
+          description: VHDファイルのサイズ
+          example: 1056250135
+          type: number
       required:
       - isDefault
       - name

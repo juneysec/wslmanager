@@ -27,6 +27,13 @@ watch(distributionsPostError, () => {
   }
 })
 
+// 通知バー関連
+const notification = ref()
+const notifications = ref<Notification[]>([])
+const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: number) => {
+  notification.value.notify(type, message, timeout)
+}
+
 // サブミット可能かどうかを更新する
 const updateCanSubmit = () => {
   canSubmit.value =
@@ -74,6 +81,9 @@ defineExpose({
 </script>
 
 <template>
+  <LoadingDialog :isLoading="isDistributionsPostFetching" />
+  <NotificationBar v-model="notifications" ref="notification" />
+
   <v-dialog v-model="showDialog" class="w-50" @keydown.esc="close">
     <v-card>
       <v-toolbar dense flat>

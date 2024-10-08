@@ -132,6 +132,10 @@ func (p *DistributionsAPI) DistributionsDistributionPut(c *gin.Context) {
 		err = workspace.Export(distribution.Name, requestBody.Path)
 	case "set-default": // デフォルトに変更する
 		err = workspace.SetDefault(distribution.Name)
+	case "move-vhd":
+		err = workspace.MoveVHD(distribution.Name, requestBody.Path)
+	case "open-vhd":
+		err = workspace.OpenVHD(distribution.Name)
 	default:
 		c.JSON(http.StatusBadRequest, schema.ResponseError{
 			Code:    "400",
@@ -214,6 +218,7 @@ func adaptDistribution(dist *domainobjects.Distribution) *schema.ResponseDistrib
 		State:     dist.State,
 		Version:   dist.Version,
 		VhdPath:   dist.VhdPath,
+		VhdSize:   float64(dist.VhdSize),
 	}
 }
 

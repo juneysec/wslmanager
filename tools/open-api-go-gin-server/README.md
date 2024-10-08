@@ -18,8 +18,10 @@ mvn package -DskipTests=true
 
 ## コード生成
 
+--type-mappings number=float64 を指定しないとfloat32 になってしまうので注意。  
+json.Number を使うほうが良いかも。  
 ```shell
-java -cp ./openapi-generator-cli.jar:./src/target/go-custom-server-openapi-generator-1.0.0.jar org.openapitools.codegen.OpenAPIGenerator generate -g go-custom-server -i ./src/openapi/openapi.yaml -o ./src/gen
+java -cp ./openapi-generator-cli.jar:./src/target/go-custom-server-openapi-generator-1.0.0.jar org.openapitools.codegen.OpenAPIGenerator generate -g go-custom-server -i ./src/openapi/openapi.yaml -o ./src/gen --type-mappings number=float64
 ```
 
 ## 参考

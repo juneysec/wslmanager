@@ -28,7 +28,7 @@ export const useDistributionsGet = () => {
       isFetching.value = false
       error.value = {
         code: "TSER",
-        message: `API呼び出しに失敗しました。${e}`
+        message: `API呼び出しに失敗しました。\n${e}`
       }
     }
   }

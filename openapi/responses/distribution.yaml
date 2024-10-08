@@ -33,3 +33,7 @@ components:
           type: string
           description: VHDファイルのベースパス
           example: C:\WSL\Ubuntu2
+        vhdSize:
+          type: number
+          description: VHDファイルのサイズ
+          example: 1056250135

@@ -10,6 +10,7 @@ import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import InputDialog from '@/components/InputDialog.vue'
 import ImportDialog from '@/views/dialogs/ImportDialog.vue'
 import InstallDialog from '@/views/dialogs/InstallDialog.vue'
+import MoveDialog from '@/views/dialogs/MoveDialog.vue'
 import { useDistributionsPost } from '@/composables/distributions-post'
 
 const distributions = ref<Apis.ResponseDistributions>([])
@@ -94,6 +95,9 @@ const stop = async (distribution: string) => {
 // インストールダイアログ
 const installDialog = ref()
 
+// VHD移動ダイアログ
+const moveDialog = ref()
+
 // 入力ダイアログ関連
 const pathInputDialog = ref()
 const pathValue = ref('')
@@ -150,6 +154,7 @@ const deleteValidator = (val: string) => {
   <InputDialog ref="deleteInputDialog" v-model="deleteValue" :validator="deleteValidator" />
   <ImportDialog ref="importDialog" :onSubmit="loadDistributions" />
   <InstallDialog ref="installDialog" :onClose="loadDistributions" />
+  <MoveDialog ref="moveDialog" :onSubmit="loadDistributions" />
 
   <v-layout-item model-value position="bottom" class="text-right" size="88">
     <div class="ma-4">
@@ -212,14 +217,14 @@ const deleteValidator = (val: string) => {
         <template v-for="item in distributions" :key="item.name">
           <tr class="upper-row">
             <td>
-              <v-container v-if="item.isDefault" class="text-right">*</v-container>
+              <div v-if="item.isDefault" class="text-right">*</div>
             </td>
             <td>{{ item.name }}</td>
             <td>{{ item.version }}</td>
             <td>
-              <v-container :class="[item.state == 'Running' ? 'play' : 'stop']">{{
+              <div :class="[item.state == 'Running' ? 'play' : 'stop']">{{
                 item.state
-              }}</v-container>
+              }}</div>
             </td>
             <td>
               <v-tooltip :text="item.name + 'を起動する'">
@@ -268,7 +273,7 @@ const deleteValidator = (val: string) => {
             <td>
               <v-tooltip :text="item.name + 'をデフォルトに設定する'">
                 <template v-slot:activator="{ props }">
-                  <v-container v-if="!item.isDefault" class="text-left"
+                  <div v-if="!item.isDefault" class="text-left"
                     ><v-btn
                       icon="mdi-asterisk"
                       class="smbtn"
@@ -276,7 +281,7 @@ const deleteValidator = (val: string) => {
                       v-bind="props"
                       @click="distributionPut(item.name!, 'set-default').then(() => info(`${item.name!}をデフォルトに設定しました。`))"
                     ></v-btn>
-                  </v-container>
+                </div>
                 </template>
               </v-tooltip>
             </td>
@@ -314,10 +319,10 @@ const deleteValidator = (val: string) => {
           <tr class="down-row">
             <td></td>
             <td colspan="8">
-              <div class="mx-4">VHDパス: {{ item.vhdPath }}</div>
+              <div class="mx-4">VHDパス: <a href="#" @click="distributionPut(item.name!, 'open-vhd').then(() => info('VHDのパスを開きました。'))">{{ item.vhdPath }}</a> ({{ (item.vhdSize! / 1024 / 1024 / 1024).toFixed(2) }} GiB)</div>
             </td>
             <td>
-              <!-- <v-tooltip :text="item.name + 'のVHDパスを移動する...'">
+              <v-tooltip :text="item.name + 'のVHDパスを移動する...'" v-if="!!item.vhdPath">
                 <template v-slot:activator="{ props }">
                   <v-btn
                     icon="mdi-folder-move"
@@ -325,10 +330,10 @@ const deleteValidator = (val: string) => {
                     :disabled="item.state !== 'Stopped'"
                     variant="text"
                     v-bind="props"
-                    @click=""
+                    @click="moveDialog.open(item.name!, item.vhdPath)"
                   />
                 </template>
-              </v-tooltip> -->
+              </v-tooltip>
             </td>
           </tr>
         </template>
@@ -361,6 +366,8 @@ const deleteValidator = (val: string) => {
 
 .down-row > td {
   border-top: 0 !important;
+  height: 0 !important;
+  padding-bottom: 16px !important;
 }
 
 .notifier {

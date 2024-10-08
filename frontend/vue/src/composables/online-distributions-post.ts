@@ -24,6 +24,7 @@ export const useOnlineDistributionsPost = () => {
         distributions.value = data
       }
 
+      isFetching.value = false
       return fetchResult
     } catch (e) {
       isFetching.value = false

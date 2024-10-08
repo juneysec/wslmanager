@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import client from '../apis'
 import type * as Api from '../apis'
 
-export type CommandEnum = 'start' | 'stop' | 'shell' | 'export' | 'set-default'
+export type CommandEnum = 'start' | 'stop' | 'shell' | 'export' | 'set-default' | 'open-vhd' | 'move-vhd'
 
 // コマンド実行
 export const useDistributionPut = () => {

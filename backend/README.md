@@ -11,6 +11,12 @@ air インストール
 go install github.com/air-verse/air@latest
 ```
 
+go-licenses インストール
+
+```shell
+go install github.com/google/go-licenses@latest
+```
+
 起動
 ```shell
 air

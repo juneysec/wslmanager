@@ -15,8 +15,10 @@ components:
           - shell  # シェル起動
           - export # エクスポート
           - set-default # デフォルトに変更する
+          - move-vhd # VHDを指定パスに移動する
+          - open-vhd # VHDのパスを開く
         path:
           type: string
-          description: コマンドが export の場合に、エクスポート先
+          description: コマンドが export/move-vhd の場合に、エクスポート先/移動先
           example: c:\wsl\exp1
 

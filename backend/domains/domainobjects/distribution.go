@@ -1,7 +1,9 @@
 // WSLのディストリビューション定義
 package domainobjects
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // ディストリビューション
 type Distribution struct {
@@ -19,6 +21,9 @@ type Distribution struct {
 
 	// VHDのパス
 	VhdPath string `json:"vhdPath"`
+
+	// VHDのサイズ
+	VhdSize int64 `json:"vhdSize"`
 }
 
 // インスタンス生成

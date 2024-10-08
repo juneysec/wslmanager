@@ -26,4 +26,7 @@ type ResponseDistribution struct {
 
   // VHDファイルのベースパス
   VhdPath string `json:"vhdPath,omitempty"`
+
+  // VHDファイルのサイズ
+  VhdSize float64 `json:"vhdSize,omitempty"`
 }

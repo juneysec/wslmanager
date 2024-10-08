@@ -55,6 +55,7 @@ watch(
     <transition-group name="notifier">
       <template v-for="(item, index) in model" :key="item">
         <v-sheet
+          v-if="!!item.message" 
           class="notifier"
           :class="{
             info: item.type == 'info',
@@ -96,7 +97,7 @@ watch(
 }
 
 .notifier-contents {
-  max-height: 5em;
+  max-height: 8em;
   overflow-y: auto; /* 垂直スクロールを有効化 */
 }
 

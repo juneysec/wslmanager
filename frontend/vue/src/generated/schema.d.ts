@@ -418,6 +418,11 @@ export interface components {
              * @example C:\WSL\Ubuntu2
              */
             vhdPath?: string;
+            /**
+             * @description VHDファイルのサイズ
+             * @example 1056250135
+             */
+            vhdSize?: number;
         };
         response_error: {
             /**
@@ -454,9 +459,9 @@ export interface components {
              * @example run
              * @enum {string}
              */
-            command: "start" | "stop" | "shell" | "export" | "set-default";
+            command: "start" | "stop" | "shell" | "export" | "set-default" | "move-vhd" | "open-vhd";
             /**
-             * @description コマンドが export の場合に、エクスポート先
+             * @description コマンドが export/move-vhd の場合に、エクスポート先/移動先
              * @example c:\wsl\exp1
              */
             path?: string;
