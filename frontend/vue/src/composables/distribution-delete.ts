@@ -12,22 +12,32 @@ export const useDistributionDelete = () => {
     error.value = undefined
     isFetching.value = true
 
-    const { data, error: fetchError } = await client.DELETE('/distributions/{distribution}', {
-      params: {
-        path: { distribution }
-      },
-      body: {
-        name: distribution
+    try {
+      const fetchResult = await client.DELETE('/distributions/{distribution}', {
+        params: {
+          path: { distribution }
+        },
+        body: {
+          name: distribution
+        }
+      })
+
+      const { data, error: fetchError } = fetchResult
+      if (fetchError) {
+        error.value = fetchError
+      } else {
+        distributions.value = data
       }
-    })
 
-    if (fetchError) {
-      error.value = fetchError
-    } else {
-      distributions.value = data
+      isFetching.value = false
+      return fetchResult
+    } catch(e) {
+      isFetching.value = false
+      error.value = {
+        code: "TSER",
+        message: `API呼び出しに失敗しました。\n${e}`
+      }
     }
-
-    isFetching.value = false
   }
 
   return {

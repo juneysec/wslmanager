@@ -11,17 +11,27 @@ export const useOnlineDistributionsPost = () => {
   async function onlineDistributionsPost(name: string) {
     error.value = undefined
     isFetching.value = true
-    const { data, error: fetchError } = await client.POST('/online-distributions', {
-      body: { name }
-    })
 
-    if (fetchError) {
-      error.value = fetchError
-    } else {
-      distributions.value = data
+    try {
+      const fetchResult = await client.POST('/online-distributions', {
+        body: { name }
+      })
+
+      const { data, error: fetchError } = fetchResult
+      if (fetchError) {
+        error.value = fetchError
+      } else {
+        distributions.value = data
+      }
+
+      return fetchResult
+    } catch (e) {
+      isFetching.value = false
+      error.value = {
+        code: "TSER",
+        message: `API呼び出しに失敗しました。\n${e}`
+      }
     }
-
-    isFetching.value = false
   }
 
   return {

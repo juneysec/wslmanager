@@ -53,14 +53,14 @@ watch(onlineDistributionsPostError, () => {
 })
 watch(isOnlineDistributionsPostFetching, () => {
   if (!isOnlineDistributionsPostFetching.value) {
-    onlineDistributionsGet()
+    onlineDistributionsGet().then(() => notify('info', 'ディストリビューションリストの読み込みに成功しました。', 3000))
   }
 })
 
 // ダイアログを開く
 const open = () => {
   showDialog.value = true
-  onlineDistributionsGet()
+  onlineDistributionsGet().then(() => notify('info', 'ディストリビューションリストの読み込みに成功しました。', 3000))
 }
 
 // ダイアログを閉じる
@@ -98,7 +98,7 @@ defineExpose({
               <td>
                 <div v-if="item.alreadyInstalled">インストール済</div>
                 <div v-else>
-                  <v-btn color="primary" @click="onlineDistributionsPost(item.name!)"
+                  <v-btn color="primary" @click="onlineDistributionsPost(item.name!).then(() => `${item.name!}をインストールしました。`)"
                     >インストール</v-btn
                   >
                 </div>

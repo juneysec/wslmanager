@@ -26,43 +26,19 @@ watch(distributionsGetData, () => {
 })
 watch(distributionsGetError, () => {
   if (distributionsGetError.value) {
-    notify(
-      'error',
-      `ディストリビューションリストの取得に失敗しました。\n${distributionsGetError.value?.message}`,
-      0
-    )
-  }
-})
-watch(isDistributionsGetFetching, () => {
-  if (!isDistributionsGetFetching.value) {
-    notify('info', 'ディストリビューションリストを読み込みました。', 3000)
+    err(`ディストリビューションリストの取得に失敗しました。\n${distributionsGetError.value?.message}`)
   }
 })
 
-distributionsGet()
-
-// distributionsPost 関連
-const importDialog = ref()
-const {
-  distributions: distributionsPostData,
-  isFetching: isDistributionsPostFetching,
-  error: distributionsPostError,
-  distributionsPost
-} = useDistributionsPost()
-watch(distributionsPostData, () => [(distributions.value = distributionsPostData.value)])
-watch(distributionsPostError, () => {
-  if (distributionsPostError.value) {
-    notify('error', distributionsPostError.value?.message ?? '', 0)
-  }
-})
-
-const importDistribution = () => {
-  distributionsPost(
-    importDialog.value.distributionName,
-    importDialog.value.importPath,
-    importDialog.value.sourcePath
-  )
+// ディストリビューションリストの読み込み
+const loadDistributions = () => {
+  distributionsGet().then(() => info('ディストリビューションリストを読み込みました。'))
 }
+loadDistributions()
+
+// インポートダイアログ 関連
+const importDialog = ref()
+const onImportSubmit = () => { loadDistributions() }
 
 // distributionPut 関連
 const {
@@ -76,7 +52,7 @@ watch(distributionPutData, () => {
 })
 watch(distributionPutError, () => {
   if (distributionPutError.value) {
-    notify('error', distributionPutError.value?.message ?? '', 0)
+    err(distributionPutError.value?.message ?? '')
   }
 })
 
@@ -92,7 +68,7 @@ watch(distributionDeleteData, () => {
 })
 watch(distributionDeleteError, () => {
   if (distributionDeleteError.value) {
-    notify('error', distributionDeleteError.value?.message ?? '', 0)
+    err(distributionDeleteError.value?.message ?? '')
   }
 })
 
@@ -102,12 +78,16 @@ const notifications = ref<Notification[]>([])
 const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: number) => {
   notification.value.notify(type, message, timeout)
 }
+const info = (message: string) => notify('info', message, 3000)
+const err = (message: string) => notify('error', message, 0)
 
 // 確認ダイアログ関連
 const confirmDialog = ref()
 const stop = async (distribution: string) => {
   if (await confirmDialog.value.open(`${distribution}を停止します。\nよろしいですか？`)) {
-    distributionPut(distribution, 'stop')
+    distributionPut(distribution, 'stop').then(fetchResult => {
+      info(`${distribution}を停止しました。`)
+    })
   }
 }
 
@@ -129,7 +109,7 @@ const exportDistribution = async (distribution: string) => {
     )
   ) {
     if (pathValue.value) {
-      distributionPut(distribution, 'export', pathValue.value)
+      distributionPut(distribution, 'export', pathValue.value).then(() => info(`${distribution}のエクスポート処理を開始しました。\n進捗についてはターミナルを確認してください。`))
     }
   }
 }
@@ -146,7 +126,7 @@ const deleteDistribution = async (distribution: string) => {
     )
   ) {
     if (deleteValue.value === distribution) {
-      distributionDelete(deleteValue.value)
+      distributionDelete(deleteValue.value).then(() => info(`${distribution}を削除しました。`))
     }
   }
 }
@@ -154,8 +134,6 @@ const deleteDistribution = async (distribution: string) => {
 const deleteValidator = (val: string) => {
   return val == targetName.value
 }
-
-const showImportDialog = ref(false)
 </script>
 
 <template>
@@ -164,15 +142,14 @@ const showImportDialog = ref(false)
     :isLoading="
       isDistributionPutFetching ||
       isDistributionsGetFetching ||
-      isDistributionDeleteFetching ||
-      isDistributionsPostFetching
+      isDistributionDeleteFetching      
     "
   />
   <ConfirmDialog ref="confirmDialog" />
   <InputDialog ref="pathInputDialog" v-model="pathValue" />
   <InputDialog ref="deleteInputDialog" v-model="deleteValue" :validator="deleteValidator" />
-  <ImportDialog ref="importDialog" v-model="showImportDialog" :onSubmit="importDistribution" />
-  <InstallDialog ref="installDialog" :onClose="distributionsGet" />
+  <ImportDialog ref="importDialog" :onSubmit="loadDistributions" />
+  <InstallDialog ref="installDialog" :onClose="loadDistributions" />
 
   <v-layout-item model-value position="bottom" class="text-right" size="88">
     <div class="ma-4">
@@ -190,8 +167,7 @@ const showImportDialog = ref(false)
     :loading="
       isDistributionPutFetching ||
       isDistributionsGetFetching ||
-      isDistributionDeleteFetching ||
-      isDistributionsPostFetching
+      isDistributionDeleteFetching
     "
     variant="tonal"
     class="mx-auto w-auto"
@@ -212,7 +188,7 @@ const showImportDialog = ref(false)
                   class="smbtn"
                   variant="text"
                   v-bind="props"
-                  @click="showImportDialog = true"
+                  @click="importDialog.open()"
                 />
               </template>
             </v-tooltip>
@@ -223,7 +199,7 @@ const showImportDialog = ref(false)
                   icon="mdi-refresh"
                   class="smbtn ml-4"
                   variant="text"
-                  @click="distributionsGet()"
+                  @click="loadDistributions"
                   v-bind="props"
                 />
               </template>
@@ -254,7 +230,7 @@ const showImportDialog = ref(false)
                     :disabled="item.state != 'Stopped'"
                     v-bind="props"
                     variant="text"
-                    @click="distributionPut(item.name!, 'start')"
+                    @click="distributionPut(item.name!, 'start').then(() => info(`${item.name!}を起動しました。`))"
                   />
                 </template>
               </v-tooltip>
@@ -282,7 +258,7 @@ const showImportDialog = ref(false)
                     variant="text"
                     class="smbtn"
                     v-bind="props"
-                    @click="distributionPut(item.name!, 'shell')"
+                    @click="distributionPut(item.name!, 'shell').then(() => info(`${item.name!}のシェルを起動しました。`))"
                   />
                 </template>
               </v-tooltip>
@@ -298,7 +274,7 @@ const showImportDialog = ref(false)
                       class="smbtn"
                       variant="text"
                       v-bind="props"
-                      @click="distributionPut(item.name!, 'set-default')"
+                      @click="distributionPut(item.name!, 'set-default').then(() => info(`${item.name!}をデフォルトに設定しました。`))"
                     ></v-btn>
                   </v-container>
                 </template>

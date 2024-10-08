@@ -1,51 +1,80 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useDistributionsPost } from '@/composables/distributions-post'
 
-const showDialog = defineModel<boolean>()
 const props = defineProps({
   onSubmit: Function
 })
 
+const showDialog = ref(false)
 const distributionName = ref('')
 const importPath = ref('')
 const sourcePath = ref('')
 const canSubmit = ref(false)
-const command = ref('')
+const commandPreview = ref('')
 
+// distributionsPost 関連
+const importDialog = ref()
+const {
+  distributions: distributionsPostData,
+  isFetching: isDistributionsPostFetching,
+  error: distributionsPostError,
+  distributionsPost
+} = useDistributionsPost()
+watch(distributionsPostError, () => {
+  if (distributionsPostError.value) {
+    notify('error', distributionsPostError.value?.message ?? '', 0)
+  }
+})
+
+// サブミット可能かどうかを更新する
 const updateCanSubmit = () => {
   canSubmit.value =
     distributionName.value.length > 0 && importPath.value.length > 0 && sourcePath.value.length > 0
 
   if (canSubmit.value) {
-    command.value = `wsl.exe --import "${distributionName.value}" "${importPath.value}" "${sourcePath.value}"`
+    commandPreview.value = `wsl.exe --import "${distributionName.value}" "${importPath.value}" "${sourcePath.value}"`
   }
 }
 
-defineExpose({
-  distributionName,
-  importPath,
-  sourcePath
-})
+// ダイアログを開く
+const open = () => {
+  showDialog.value = true
+}
 
+// ダイアログを閉じる
+const close = () => {
+  showDialog.value = false
+}
+
+// 入力値監視
 watch(distributionName, updateCanSubmit)
 watch(importPath, updateCanSubmit)
 watch(sourcePath, updateCanSubmit)
 
-const submit = async () => {
-  if (props.onSubmit) {
-    await props.onSubmit()
-  }
+const submit = () => {
+  distributionsPost(
+    importDialog.value.distributionName,
+    importDialog.value.importPath,
+    importDialog.value.sourcePath
+  ).then(fetchResult => {
+    if (props.onSubmit) {
+      props.onSubmit()
+    }
 
-  showDialog.value = false
+    close()
+  })
 }
 
-const cancel = () => {
-  showDialog.value = false
-}
+// エクスポート定義
+defineExpose({
+  open,
+  close,
+})
 </script>
 
 <template>
-  <v-dialog v-model="showDialog" class="w-50" @keydown.esc="cancel">
+  <v-dialog v-model="showDialog" class="w-50" @keydown.esc="close">
     <v-card>
       <v-toolbar dense flat>
         <v-toolbar-title
@@ -79,11 +108,11 @@ const cancel = () => {
         />
       </v-form>
 
-      <v-card-text>コマンドプレビュー：{{ command }}</v-card-text>
+      <v-card-text>コマンドプレビュー：{{ commandPreview }}</v-card-text>
 
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
-        <v-btn color="error" @click="cancel" class="mx-3">
+        <v-btn color="error" @click="close" class="mx-3">
           <v-icon class="text-button"> mdi-cancel </v-icon>
           キャンセル
         </v-btn>

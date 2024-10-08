@@ -18,23 +18,33 @@ export const useDistributionPut = () => {
     error.value = undefined
     isFetching.value = true
 
-    const { data, error: fetchError } = await client.PUT('/distributions/{distribution}', {
-      params: {
-        path: { distribution }
-      },
-      body: {
-        command,
-        path
+    try {
+      const fetchResult = await client.PUT('/distributions/{distribution}', {
+        params: {
+          path: { distribution }
+        },
+        body: {
+          command,
+          path
+        }
+      })
+
+      const { data, error: fetchError } = fetchResult
+      if (fetchError) {
+        error.value = fetchError
+      } else {
+        distributions.value = data
       }
-    })
 
-    if (fetchError) {
-      error.value = fetchError
-    } else {
-      distributions.value = data
+      isFetching.value = false
+      return fetchResult
+    } catch(e) {
+      isFetching.value = false
+      error.value = {
+        code: "TSER",
+        message: `API呼び出しに失敗しました。\n${e}`
+      }
     }
-
-    isFetching.value = false
   }
 
   return {

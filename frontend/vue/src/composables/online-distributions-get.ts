@@ -1,6 +1,6 @@
 import { ref } from 'vue'
-import client from '@/apis'
-import * as Api from '@/apis'
+import client from '../apis'
+import * as Api from '../apis'
 
 // リスト取得
 export const useOnlineDistributionsGet = () => {
@@ -11,15 +11,25 @@ export const useOnlineDistributionsGet = () => {
   async function onlineDistributionsGet() {
     error.value = undefined
     isFetching.value = true
-    const { data, error: fetchError } = await client.GET('/online-distributions')
 
-    if (fetchError) {
-      error.value = fetchError
-    } else {
-      distributions.value = data
+    try {
+      const fetchResult = await client.GET('/online-distributions')
+      const { data, error: fetchError } = fetchResult
+      if (fetchError) {
+        error.value = fetchError
+      } else {
+        distributions.value = data
+      }
+
+      isFetching.value = false
+      return fetchResult
+    } catch (e) {
+      isFetching.value = false
+      error.value = {
+        code: "TSER",
+        message: `API呼び出しに失敗しました。\n${e}`
+      }
     }
-
-    isFetching.value = false
   }
 
   return {
