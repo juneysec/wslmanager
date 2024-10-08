@@ -11,9 +11,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Serve() {
-	r := gin.Default()
+func Serve(port int, isDebug bool) {
+	if !isDebug {
+		gin.SetMode(gin.ReleaseMode)
+		exec.Command("cmd.exe", "/C", "start", fmt.Sprintf("http://localhost:%d", port)).Start()
+	}
 
+	r := gin.Default()
 	if gin.IsDebugging() {
 		r.Use(cors.New(cors.Config{
 			// 許可したいHTTPメソッドの一覧
@@ -43,7 +47,6 @@ func Serve() {
 		}))
 	}
 
-	exec.Command("cmd.exe", "/C", "start", "http://localhost:8080").Start()
 	RegisterRoutes(r)
 
 	r.Static("/assets", "./dist/assets")
@@ -59,5 +62,6 @@ func Serve() {
 			c.File("./dist" + c.Request.RequestURI)
 		}
 	})
-	r.Run()
+
+	r.Run(fmt.Sprintf(":%d", port))
 }

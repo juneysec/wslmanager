@@ -2,7 +2,14 @@ import { ref } from 'vue'
 import client from '../apis'
 import type * as Api from '../apis'
 
-export type CommandEnum = 'start' | 'stop' | 'shell' | 'export' | 'set-default' | 'open-vhd' | 'move-vhd'
+export type CommandEnum =
+  | 'start'
+  | 'stop'
+  | 'shell'
+  | 'export'
+  | 'set-default'
+  | 'open-vhd'
+  | 'move-vhd'
 
 // コマンド実行
 export const useDistributionPut = () => {
@@ -38,10 +45,10 @@ export const useDistributionPut = () => {
 
       isFetching.value = false
       return fetchResult
-    } catch(e) {
+    } catch (e) {
       isFetching.value = false
       error.value = {
-        code: "TSER",
+        code: 'TSER',
         message: `API呼び出しに失敗しました。\n${e}`
       }
     }

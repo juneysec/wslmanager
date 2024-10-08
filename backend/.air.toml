@@ -3,7 +3,7 @@ testdata_dir = "testdata"
 tmp_dir = "tmp"
 
 [build]
-  args_bin = ["exec", "./tmp/main.exe", "--listen=127.0.0.1:2345", "--headless=true", "--api-version=2", "--accept-multiclient", "--log", "--continue"]
+  args_bin = ["exec", "./tmp/main.exe", "--listen=127.0.0.1:2345", "--headless=true", "--api-version=2", "--accept-multiclient", "--log", "--continue", "--", "-debug"]
   bin = "./tmp/main.exe"
   cmd = "go build -gcflags=all=-N -gcflags=all=-l -o tmp/main.exe main.go"
   delay = 1000

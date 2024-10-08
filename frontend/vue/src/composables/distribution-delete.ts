@@ -31,10 +31,10 @@ export const useDistributionDelete = () => {
 
       isFetching.value = false
       return fetchResult
-    } catch(e) {
+    } catch (e) {
       isFetching.value = false
       error.value = {
-        code: "TSER",
+        code: 'TSER',
         message: `API呼び出しに失敗しました。\n${e}`
       }
     }

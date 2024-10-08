@@ -12,6 +12,6 @@ export type ResponseOnlineDistributions =
   schemas['/online-distributions']['get']['responses']['200']['content']['application/json']
 
 const client = createClient<schemas>({
-  baseUrl: import.meta.env.PROD ? '/api/v1' : 'http://localhost:8080/api/v1'
+  baseUrl: import.meta.env.PROD ? '/api/v1' : 'http://localhost:7711/api/v1'
 })
 export default client

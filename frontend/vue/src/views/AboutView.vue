@@ -8,7 +8,7 @@ const tab = ref(0)
 
 <template>
   <v-sheet>
-    <h1>WSL Manager Ver 0.0.2</h1>
+    <h1>WSL Manager Ver1.0.0</h1>
 
     <v-container class="text-left">
       Vue の練習に作ったアプリ。以下のパッケージを利用して作成されています。

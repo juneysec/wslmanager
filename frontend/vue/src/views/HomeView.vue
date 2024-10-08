@@ -27,19 +27,28 @@ watch(distributionsGetData, () => {
 })
 watch(distributionsGetError, () => {
   if (distributionsGetError.value) {
-    err(`ディストリビューションリストの取得に失敗しました。\n${distributionsGetError.value?.message}`)
+    err(
+      `ディストリビューションリストの取得に失敗しました。\n${distributionsGetError.value?.message}`
+    )
   }
 })
 
 // ディストリビューションリストの読み込み
 const loadDistributions = () => {
-  distributionsGet().then(() => info('ディストリビューションリストを読み込みました。'))
+  distributionsGet().then((fetchResult) => {
+    if (fetchResult) {
+      info('ディストリビューションリストを読み込みました。')
+    }
+  })
 }
+
 loadDistributions()
 
 // インポートダイアログ 関連
 const importDialog = ref()
-const onImportSubmit = () => { loadDistributions() }
+const onImportSubmit = () => {
+  loadDistributions()
+}
 
 // distributionPut 関連
 const {
@@ -86,7 +95,7 @@ const err = (message: string) => notify('error', message, 0)
 const confirmDialog = ref()
 const stop = async (distribution: string) => {
   if (await confirmDialog.value.open(`${distribution}を停止します。\nよろしいですか？`)) {
-    distributionPut(distribution, 'stop').then(fetchResult => {
+    distributionPut(distribution, 'stop').then((fetchResult) => {
       info(`${distribution}を停止しました。`)
     })
   }
@@ -113,7 +122,11 @@ const exportDistribution = async (distribution: string) => {
     )
   ) {
     if (pathValue.value) {
-      distributionPut(distribution, 'export', pathValue.value).then(() => info(`${distribution}のエクスポート処理を開始しました。\n進捗についてはターミナルを確認してください。`))
+      distributionPut(distribution, 'export', pathValue.value).then(() =>
+        info(
+          `${distribution}のエクスポート処理を開始しました。\n進捗についてはターミナルを確認してください。`
+        )
+      )
     }
   }
 }
@@ -144,9 +157,7 @@ const deleteValidator = (val: string) => {
   <NotificationBar v-model="notifications" ref="notification" />
   <LoadingDialog
     :isLoading="
-      isDistributionPutFetching ||
-      isDistributionsGetFetching ||
-      isDistributionDeleteFetching      
+      isDistributionPutFetching || isDistributionsGetFetching || isDistributionDeleteFetching
     "
   />
   <ConfirmDialog ref="confirmDialog" />
@@ -170,9 +181,7 @@ const deleteValidator = (val: string) => {
 
   <v-sheet
     :loading="
-      isDistributionPutFetching ||
-      isDistributionsGetFetching ||
-      isDistributionDeleteFetching
+      isDistributionPutFetching || isDistributionsGetFetching || isDistributionDeleteFetching
     "
     variant="tonal"
     class="mx-auto w-auto"
@@ -184,8 +193,8 @@ const deleteValidator = (val: string) => {
           <th nowrap width="100%">ディストリビューション</th>
           <th nowrap>バージョン</th>
           <th nowrap width="0" class="text-center">状態</th>
-          <th width="0" colspan="3">コマンド</th>
-          <th width="0" colspan="3" class="text-right">
+          <th width="0" colspan="3" nowrap>コマンド</th>
+          <th width="0" colspan="3" class="text-right" nowrap>
             <v-tooltip text="インポート...">
               <template v-slot:activator="{ props }">
                 <v-btn
@@ -222,9 +231,7 @@ const deleteValidator = (val: string) => {
             <td>{{ item.name }}</td>
             <td>{{ item.version }}</td>
             <td>
-              <div :class="[item.state == 'Running' ? 'play' : 'stop']">{{
-                item.state
-              }}</div>
+              <div :class="[item.state == 'Running' ? 'play' : 'stop']">{{ item.state }}</div>
             </td>
             <td>
               <v-tooltip :text="item.name + 'を起動する'">
@@ -235,7 +242,11 @@ const deleteValidator = (val: string) => {
                     :disabled="item.state != 'Stopped'"
                     v-bind="props"
                     variant="text"
-                    @click="distributionPut(item.name!, 'start').then(() => info(`${item.name!}を起動しました。`))"
+                    @click="
+                      distributionPut(item.name!, 'start').then(() =>
+                        info(`${item.name!}を起動しました。`)
+                      )
+                    "
                   />
                 </template>
               </v-tooltip>
@@ -263,7 +274,11 @@ const deleteValidator = (val: string) => {
                     variant="text"
                     class="smbtn"
                     v-bind="props"
-                    @click="distributionPut(item.name!, 'shell').then(() => info(`${item.name!}のシェルを起動しました。`))"
+                    @click="
+                      distributionPut(item.name!, 'shell').then(() =>
+                        info(`${item.name!}のシェルを起動しました。`)
+                      )
+                    "
                   />
                 </template>
               </v-tooltip>
@@ -273,15 +288,19 @@ const deleteValidator = (val: string) => {
             <td>
               <v-tooltip :text="item.name + 'をデフォルトに設定する'">
                 <template v-slot:activator="{ props }">
-                  <div v-if="!item.isDefault" class="text-left"
-                    ><v-btn
+                  <div v-if="!item.isDefault" class="text-left">
+                    <v-btn
                       icon="mdi-asterisk"
                       class="smbtn"
                       variant="text"
                       v-bind="props"
-                      @click="distributionPut(item.name!, 'set-default').then(() => info(`${item.name!}をデフォルトに設定しました。`))"
+                      @click="
+                        distributionPut(item.name!, 'set-default').then(() =>
+                          info(`${item.name!}をデフォルトに設定しました。`)
+                        )
+                      "
                     ></v-btn>
-                </div>
+                  </div>
                 </template>
               </v-tooltip>
             </td>
@@ -319,7 +338,19 @@ const deleteValidator = (val: string) => {
           <tr class="down-row">
             <td></td>
             <td colspan="8">
-              <div class="mx-4">VHDパス: <a href="#" @click="distributionPut(item.name!, 'open-vhd').then(() => info('VHDのパスを開きました。'))">{{ item.vhdPath }}</a> ({{ (item.vhdSize! / 1024 / 1024 / 1024).toFixed(2) }} GiB)</div>
+              <div class="mx-4">
+                VHDパス:
+                <a
+                  href="#"
+                  @click="
+                    distributionPut(item.name!, 'open-vhd').then(() =>
+                      info('VHDのパスを開きました。')
+                    )
+                  "
+                  >{{ item.vhdPath }}</a
+                >
+                ({{ (item.vhdSize! / 1024 / 1024 / 1024).toFixed(2) }} GiB)
+              </div>
             </td>
             <td>
               <v-tooltip :text="item.name + 'のVHDパスを移動する...'" v-if="!!item.vhdPath">

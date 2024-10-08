@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useDistributionsPost } from '@/composables/distributions-post'
+import LoadingDialog from '@/components/LoadingDialog.vue'
+import NotificationBar, { type Notification } from '@/components/NotificationBar.vue'
 
 const props = defineProps({
   onSubmit: Function
@@ -16,7 +18,6 @@ const commandPreview = ref('')
 // distributionsPost 関連
 const importDialog = ref()
 const {
-  distributions: distributionsPostData,
   isFetching: isDistributionsPostFetching,
   error: distributionsPostError,
   distributionsPost
@@ -64,7 +65,14 @@ const submit = () => {
     importDialog.value.distributionName,
     importDialog.value.importPath,
     importDialog.value.sourcePath
-  ).then(fetchResult => {
+  ).then((fetchResult) => {
+    if (fetchResult) {
+      const { error } = fetchResult
+
+      if (error) {
+        notify('error', error.message ?? '', 0)
+      }
+    }
     if (props.onSubmit) {
       props.onSubmit()
     }
@@ -76,7 +84,7 @@ const submit = () => {
 // エクスポート定義
 defineExpose({
   open,
-  close,
+  close
 })
 </script>
 

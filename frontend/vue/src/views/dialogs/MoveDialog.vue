@@ -3,8 +3,6 @@ import { ref, watch } from 'vue'
 import { useDistributionPut } from '@/composables/distribution-put'
 import LoadingDialog from '@/components/LoadingDialog.vue'
 import NotificationBar, { type Notification } from '@/components/NotificationBar.vue'
-import type * as Api from '@/apis'
-
 
 const props = defineProps({
   onSubmit: Function
@@ -24,13 +22,7 @@ const notify = (type: 'info' | 'warn' | 'error', message: string, timeout: numbe
 }
 
 // useDistributionPut 関連
-const importDialog = ref()
-const {
-  distributions,
-  isFetching,
-  error,
-  distributionPut
-} = useDistributionPut()
+const { isFetching, error, distributionPut } = useDistributionPut()
 watch(error, () => {
   if (error.value) {
     notify('error', error.value?.message ?? '', 0)
@@ -48,10 +40,10 @@ const updateCanSubmit = () => {
 
 // ダイアログを開く
 const open = (distributionName: string, path: string) => {
-  if (!!distributionName) {
-      showDialog.value = true
-      distribution.value = distributionName
-      destinationPath.value = path
+  if (distributionName) {
+    showDialog.value = true
+    distribution.value = distributionName
+    destinationPath.value = path
   }
 }
 
@@ -65,17 +57,19 @@ watch(distribution, updateCanSubmit)
 watch(destinationPath, updateCanSubmit)
 
 const submit = () => {
-  distributionPut(distribution.value, "move-vhd", destinationPath.value).then((fetchResult) => {
-    const { error } = fetchResult
+  distributionPut(distribution.value, 'move-vhd', destinationPath.value).then((fetchResult) => {
+    if (fetchResult) {
+      const { error } = fetchResult
 
-    if (error instanceof Api.ResponseError) {
-      notify('error', `コマンド実行でエラーが発生しました。\n${error.message}`, 0)
-    } else {
-      if (props.onSubmit) {
-        props.onSubmit()
+      if (error) {
+        notify('error', `コマンド実行でエラーが発生しました。\n${error.message}`, 0)
+      } else {
+        if (props.onSubmit) {
+          props.onSubmit()
+        }
+
+        close()
       }
-
-      close()
     }
   })
 }
@@ -83,7 +77,7 @@ const submit = () => {
 // エクスポート定義
 defineExpose({
   open,
-  close,
+  close
 })
 </script>
 
@@ -109,7 +103,6 @@ defineExpose({
           placeholder="移動先(フォルダを指定)"
           label="移動先(フォルダを指定)"
         />
-
       </v-form>
 
       <v-card-text>コマンドプレビュー：{{ commandPreview }}</v-card-text>
