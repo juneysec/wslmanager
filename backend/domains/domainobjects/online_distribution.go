@@ -2,7 +2,7 @@ package domainobjects
 
 import "fmt"
 
-// ディストリビューション
+// オンラインディストリビューション
 type OnlineDistribution struct {
 	// 名前
 	Name string `json:"name"`
@@ -17,8 +17,8 @@ type OnlineDistribution struct {
 // インスタンス生成
 func NewOnlineDistribution(name string, friendlyName string, alreadyInstalled bool) (*OnlineDistribution, error) {
 	return &OnlineDistribution{
-		Name:      name,
-		FriendlyName: friendlyName,
+		Name:             name,
+		FriendlyName:     friendlyName,
 		AlreadyInstalled: alreadyInstalled,
 	}, nil
 }

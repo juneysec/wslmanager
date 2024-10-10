@@ -135,7 +135,7 @@ func (p *DistributionsAPI) DistributionsDistributionPut(c *gin.Context) {
 	case "move-vhd":
 		err = workspace.MoveVHD(distribution.Name, requestBody.Path)
 	case "open-vhd":
-		err = workspace.OpenVHD(distribution.Name)
+		err = workspace.OpenVHDDirectory(distribution.Name)
 	default:
 		c.JSON(http.StatusBadRequest, schema.ResponseError{
 			Code:    "400",
